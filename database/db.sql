@@ -9,6 +9,7 @@ CREATE TABLE users (
     phoneNo VARCHAR(20),
     password VARCHAR(255),
     resume VARCHAR(255),
+    badge VARCHAR(20) NOT NULL DEFAULT 'Onsite';
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
