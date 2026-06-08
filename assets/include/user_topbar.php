@@ -1,24 +1,67 @@
 <?php
 /**
- * navbar.php — Reusable Top Navigation Bar
- * Usage on any page: <?php include 'includes/navbar.php'; ?>
- *
- * Pass $activePage before including to highlight the correct nav link:
- *   $activePage = 'dashboard'; // or 'companies', 'positions', 'about'
- *
- * Pass $currentUser array for profile display:
- *   $currentUser = ['name' => 'Jane Doe', 'initials' => 'JD', 'notif_count' => 3];
+ * user_topbar.php — Reusable Top Navigation Bar
  */
 
-// Defaults if not set by the parent page
-$activePage   = $activePage   ?? 'dashboard';
-$currentUser  = $currentUser  ?? ['name' => 'Jane Doe', 'initials' => 'JD', 'notif_count' => 3];
+// ── Auth: fetch user from DB if logged in ────────────────────────────────────
+if (!isset($conn)) {
+    require_once '../database/db.php';
+}
+
+// Protected pages — redirect to login if not logged in
+$protectedPages = ['profile.php', 'applications.php', 'settings.php', 'dashboard.php'];
+$currentPage    = basename($_SERVER['PHP_SELF']);
+
+if (in_array($currentPage, $protectedPages) && empty($_SESSION['user_id'])) {
+    header('Location: login.php');
+    exit;
+}
+
+// Fetch user from DB only if not already fetched by the host page
+if (!empty($_SESSION['user_id']) && empty($currentUser)) {
+    $stmt = $conn->prepare('SELECT user_id, name, email FROM users WHERE user_id = ? LIMIT 1');
+    $stmt->bind_param('i', $_SESSION['user_id']);
+    $stmt->execute();
+    $dbUser = $stmt->get_result()->fetch_assoc();
+    $stmt->close();
+
+    if ($dbUser) {
+        $nameParts = explode(' ', trim($dbUser['name']));
+        $initials  = strtoupper(
+            (isset($nameParts[0]) ? $nameParts[0][0] : '') .
+            (isset($nameParts[1]) ? $nameParts[1][0] : '')
+        );
+        $currentUser = [
+            'name'        => $dbUser['name'],
+            'initials'    => $initials,
+            'notif_count' => 0,
+        ];
+    }
+}
+
+// 如果 host page 已经查询并设置了 $currentUser（如 dashboard.php），
+// 确保它包含 topbar 需要的 initials 和 notif_count 字段
+if (!empty($currentUser) && !isset($currentUser['initials'])) {
+    $nameParts = explode(' ', trim($currentUser['name']));
+    $currentUser['initials'] = strtoupper(
+        (isset($nameParts[0]) ? $nameParts[0][0] : '') .
+        (isset($nameParts[1]) ? $nameParts[1][0] : '')
+    );
+}
+
+if (!empty($currentUser) && !isset($currentUser['notif_count'])) {
+    $currentUser['notif_count'] = 0;
+}
+
+// Defaults if not logged in
+$activePage  = $activePage  ?? 'dashboard';
+$currentUser = $currentUser ?? ['name' => 'Guest', 'initials' => '?', 'notif_count' => 0];
 
 $navLinks = [
-    'dashboard' => ['label' => 'Dashboard',  'href' => 'dashboard.php'],
-    'companies' => ['label' => 'Companies',  'href' => 'companies.php'],
-    'positions' => ['label' => 'Positions',  'href' => 'positions.php'],
-    'about'     => ['label' => 'About Us',   'href' => 'about.php'],
+    'dashboard' => ['label' => 'Dashboard', 'href' => 'dashboard.php'],
+    'companies' => ['label' => 'Companies', 'href' => 'companies.php'],
+    'positions' => ['label' => 'Positions', 'href' => 'positions.php'],
+    'about'     => ['label' => 'About Us',  'href' => 'about.php'],
 ];
 ?>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -65,15 +108,11 @@ $navLinks = [
   }
 
   .ap-nav__logo-mark {
-    width: 32px;
-    height: 32px;
+    width: 32px; height: 32px;
     background: var(--ink);
     border-radius: 6px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    position: relative;
-    overflow: hidden;
+    display: flex; align-items: center; justify-content: center;
+    position: relative; overflow: hidden;
   }
 
   .ap-nav__logo-mark::after {
@@ -89,36 +128,25 @@ $navLinks = [
 
   .ap-nav__logo-text {
     font-family: 'Syne', sans-serif;
-    font-weight: 800;
-    font-size: 18px;
-    color: var(--ink);
-    letter-spacing: -0.5px;
+    font-weight: 800; font-size: 18px;
+    color: var(--ink); letter-spacing: -0.5px;
   }
 
   .ap-nav__logo-text span { color: var(--accent); }
 
   .ap-nav__links {
-    display: flex;
-    align-items: center;
-    gap: 4px;
-    list-style: none;
+    display: flex; align-items: center; gap: 4px; list-style: none;
   }
 
   .ap-nav__links a {
-    text-decoration: none;
-    color: var(--mid);
-    font-size: 14px;
-    font-weight: 500;
-    padding: 6px 12px;
-    border-radius: 6px;
+    text-decoration: none; color: var(--mid);
+    font-size: 14px; font-weight: 500;
+    padding: 6px 12px; border-radius: 6px;
     transition: color 0.2s, background 0.2s;
   }
 
   .ap-nav__links a:hover,
-  .ap-nav__links a.active {
-    color: var(--ink);
-    background: rgba(0,0,0,0.05);
-  }
+  .ap-nav__links a.active { color: var(--ink); background: rgba(0,0,0,0.05); }
 
   .ap-nav__spacer { flex: 1; }
 
@@ -127,13 +155,9 @@ $navLinks = [
   .ap-nav__notif {
     position: relative;
     width: 38px; height: 38px;
-    border: 1.5px solid var(--border);
-    border-radius: 8px;
-    background: transparent;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    border: 1.5px solid var(--border); border-radius: 8px;
+    background: transparent; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
     transition: border-color 0.2s, background 0.2s;
   }
 
@@ -158,14 +182,10 @@ $navLinks = [
   .ap-nav__profile { position: relative; }
 
   .ap-nav__profile-btn {
-    display: flex;
-    align-items: center;
-    gap: 8px;
+    display: flex; align-items: center; gap: 8px;
     padding: 5px 10px 5px 5px;
-    border: 1.5px solid var(--border);
-    border-radius: 8px;
-    background: transparent;
-    cursor: pointer;
+    border: 1.5px solid var(--border); border-radius: 8px;
+    background: transparent; cursor: pointer;
     transition: border-color 0.2s;
     font-family: 'DM Sans', sans-serif;
   }
@@ -174,8 +194,7 @@ $navLinks = [
 
   .ap-nav__avatar {
     width: 28px; height: 28px;
-    background: var(--ink);
-    border-radius: 6px;
+    background: var(--ink); border-radius: 6px;
     display: flex; align-items: center; justify-content: center;
     font-family: 'Syne', sans-serif;
     font-weight: 700; font-size: 11px;
@@ -198,11 +217,9 @@ $navLinks = [
     min-width: 180px;
     background: var(--paper);
     border: 1.5px solid var(--border);
-    border-radius: 10px;
-    padding: 6px;
+    border-radius: 10px; padding: 6px;
     box-shadow: 0 8px 24px rgba(0,0,0,0.08);
-    display: none;
-    z-index: 200;
+    display: none; z-index: 200;
   }
 
   .ap-nav__profile.open .ap-nav__dropdown { display: block; }
@@ -211,8 +228,7 @@ $navLinks = [
     display: flex; align-items: center; gap: 8px;
     padding: 8px 10px;
     font-size: 13px; color: var(--mid);
-    text-decoration: none;
-    border-radius: 6px;
+    text-decoration: none; border-radius: 6px;
     transition: background 0.15s, color 0.15s;
     font-family: 'DM Sans', sans-serif;
   }
@@ -221,6 +237,11 @@ $navLinks = [
   .ap-nav__dropdown-divider { height: 1px; background: var(--border); margin: 4px 0; }
   .ap-nav__dropdown .logout { color: #c0392b; }
   .ap-nav__dropdown .logout:hover { background: #fef2f2; color: #c0392b; }
+
+  /* Disabled link style for guests */
+  .ap-nav__dropdown a.disabled {
+    opacity: 0.4; pointer-events: none; cursor: default;
+  }
 
   @media (max-width: 768px) {
     .ap-nav__links { display: none; }
@@ -231,7 +252,6 @@ $navLinks = [
 <nav class="ap-nav" role="navigation" aria-label="Main navigation">
   <div class="ap-nav__inner">
 
-    <!-- Logo — always links to dashboard -->
     <a href="dashboard.php" class="ap-nav__logo" aria-label="ApplyGo — go to dashboard">
       <div class="ap-nav__logo-mark">
         <svg viewBox="0 0 16 16"><path d="M2 12 L8 4 L14 12" stroke="#fff" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
@@ -239,7 +259,6 @@ $navLinks = [
       <span class="ap-nav__logo-text">Apply<span>Go</span></span>
     </a>
 
-    <!-- Navigation Links (active state set by PHP) -->
     <ul class="ap-nav__links">
       <?php foreach ($navLinks as $key => $link): ?>
         <li>
@@ -253,7 +272,6 @@ $navLinks = [
 
     <div class="ap-nav__spacer"></div>
 
-    <!-- Right Actions -->
     <div class="ap-nav__actions">
 
       <!-- Notification Bell -->
@@ -263,8 +281,7 @@ $navLinks = [
           <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
         </svg>
         <?php if (!empty($currentUser['notif_count']) && $currentUser['notif_count'] > 0): ?>
-          <span class="ap-nav__notif-dot"
-                id="notif-dot"
+          <span class="ap-nav__notif-dot" id="notif-dot"
                 aria-label="<?= (int)$currentUser['notif_count'] ?> unread notifications">
           </span>
         <?php endif; ?>
@@ -288,36 +305,61 @@ $navLinks = [
         </button>
 
         <div class="ap-nav__dropdown" role="menu">
-          <a href="profile.php" role="menuitem">
+
+          <?php $loggedIn = !empty($_SESSION['user_id']); ?>
+
+          <a href="<?= $loggedIn ? 'profile.php' : 'login.php' ?>"
+             <?= !$loggedIn ? 'class="disabled"' : '' ?>
+             role="menuitem">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <circle cx="12" cy="8" r="4"/>
               <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/>
             </svg>
             My Profile
           </a>
-          <a href="applications.php" role="menuitem">
+
+          <a href="<?= $loggedIn ? 'applications.php' : 'login.php' ?>"
+             <?= !$loggedIn ? 'class="disabled"' : '' ?>
+             role="menuitem">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <path d="M9 11l3 3L22 4"/>
               <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
             </svg>
             My Applications
           </a>
-          <a href="settings.php" role="menuitem">
+
+          <a href="<?= $loggedIn ? 'settings.php' : 'login.php' ?>"
+             <?= !$loggedIn ? 'class="disabled"' : '' ?>
+             role="menuitem">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <circle cx="12" cy="12" r="3"/>
               <path d="M12 2v2m0 16v2M4.22 4.22l1.42 1.42m12.72 12.72 1.42 1.42M2 12h2m16 0h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>
             </svg>
             Settings
           </a>
+
           <div class="ap-nav__dropdown-divider"></div>
-          <a href="logout.php" class="logout" role="menuitem">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
-              <polyline points="16 17 21 12 16 7"/>
-              <line x1="21" y1="12" x2="9" y2="12"/>
-            </svg>
-            Sign Out
-          </a>
+
+          <?php if ($loggedIn): ?>
+            <a href="logout.php" class="logout" role="menuitem">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+                <polyline points="16 17 21 12 16 7"/>
+                <line x1="21" y1="12" x2="9" y2="12"/>
+              </svg>
+              Sign Out
+            </a>
+          <?php else: ?>
+            <a href="login.php" role="menuitem">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/>
+                <polyline points="10 17 15 12 10 7"/>
+                <line x1="15" y1="12" x2="3" y2="12"/>
+              </svg>
+              Sign In
+            </a>
+          <?php endif; ?>
+
         </div>
       </div>
 
@@ -336,11 +378,9 @@ $navLinks = [
   function toggleNotifications() {
     const dot = document.getElementById('notif-dot');
     if (dot) dot.remove();
-    // TODO: replace with a real notification panel
     alert('Notification panel coming soon!');
   }
 
-  // Close dropdown when clicking outside
   document.addEventListener('click', function(e) {
     const menu = document.getElementById('profileMenu');
     if (menu && !menu.contains(e.target)) {

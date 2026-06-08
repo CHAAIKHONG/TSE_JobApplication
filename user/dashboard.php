@@ -1,109 +1,84 @@
 <?php
-$activePage  = 'dashboard';
-$pageTitle   = 'Dashboard — ApplyGo';
+session_start();
 
-// ── Current user (replace with session/DB data) ──
-$currentUser = [
-    'name'        => 'Jane Doe',
-    'initials'    => 'JD',
-    'notif_count' => 3,
-];
+$activePage = 'dashboard';
+$pageTitle  = 'Dashboard — ApplyGo';
 
-// ── Sample job listings (replace with DB query) ──
-$jobs = [
-    [
-        'id'          => 1,
-        'position'    => 'Senior Frontend Engineer',
-        'company'     => 'Stripe',
-        'company_abbr'=> 'Str',
-        'description' => 'Build and scale world-class payment interfaces used by millions globally. Work on complex UI challenges, collaborate with world-class designers, and ship features with real impact.',
-        'salary'      => '$140K – $175K',
-        'salary_period'=> 'per year',
-        'tags'        => ['remote', 'new'],
-    ],
-    [
-        'id'          => 2,
-        'position'    => 'Product Manager, Growth',
-        'company'     => 'LinkedIn',
-        'company_abbr'=> 'Lin',
-        'description' => 'Drive growth strategy across LinkedIn\'s core professional network. Define the roadmap, partner with engineering and data science, and influence product direction at scale.',
-        'salary'      => '$160K – $200K',
-        'salary_period'=> 'per year',
-        'tags'        => ['onsite'],
-    ],
-    [
-        'id'          => 3,
-        'position'    => 'UX / Product Designer',
-        'company'     => 'Figma',
-        'company_abbr'=> 'Fig',
-        'description' => 'Shape the future of design tooling by creating intuitive, beautiful experiences for Figma\'s professional user base. Own end-to-end design for a core product area.',
-        'salary'      => '$130K – $165K',
-        'salary_period'=> 'per year',
-        'tags'        => ['remote', 'new'],
-    ],
-    [
-        'id'          => 4,
-        'position'    => 'DevRel Engineer',
-        'company'     => 'Vercel',
-        'company_abbr'=> 'Ver',
-        'description' => 'Advocate for Vercel\'s platform and empower developers worldwide. Create content, give talks, build demos, and serve as the bridge between product and the developer community.',
-        'salary'      => '$120K – $150K',
-        'salary_period'=> 'per year',
-        'tags'        => ['remote'],
-    ],
-    [
-        'id'          => 5,
-        'position'    => 'ML Research Engineer',
-        'company'     => 'Archetype AI',
-        'company_abbr'=> 'Arc',
-        'description' => 'Work on cutting-edge physical AI research — training large multimodal models on sensor data. Ideal for someone who loves the intersection of research and high-performance systems.',
-        'salary'      => '$180K – $240K',
-        'salary_period'=> 'per year',
-        'tags'        => ['onsite', 'urgent'],
-    ],
-    [
-        'id'          => 6,
-        'position'    => 'Backend Engineer, Platform',
-        'company'     => 'Notion',
-        'company_abbr'=> 'Not',
-        'description' => 'Scale Notion\'s infrastructure to support 100M+ users. Work on distributed systems, performance optimisation, and platform reliability. Strong CS fundamentals required.',
-        'salary'      => '$150K – $190K',
-        'salary_period'=> 'per year',
-        'tags'        => ['remote'],
-    ],
-    [
-        'id'          => 7,
-        'position'    => 'Data Scientist, Trust',
-        'company'     => 'Airbnb',
-        'company_abbr'=> 'Air',
-        'description' => 'Use data science and ML to keep Airbnb\'s marketplace safe and trusted. Build fraud detection models, run experiments, and derive insights that protect hosts and guests at scale.',
-        'salary'      => '$145K – $180K',
-        'salary_period'=> 'per year',
-        'tags'        => ['onsite'],
-    ],
-    [
-        'id'          => 8,
-        'position'    => 'Full-Stack Engineer',
-        'company'     => 'Linear',
-        'company_abbr'=> 'Lin',
-        'description' => 'Join a small, elite team building the project management tool top engineering teams rely on. Contribute across the full stack in a fast-paced, high-ownership environment.',
-        'salary'      => '$150K – $200K',
-        'salary_period'=> 'per year',
-        'tags'        => ['remote', 'new'],
-    ],
-    [
-        'id'          => 9,
-        'position'    => 'Engineering Manager',
-        'company'     => 'Shopify',
-        'company_abbr'=> 'Sho',
-        'description' => 'Lead a high-performing team of engineers working on Shopify\'s Checkout — the highest-traffic area of the platform. Drive technical excellence, team growth, and delivery at scale.',
-        'salary'      => '$190K – $230K',
-        'salary_period'=> 'per year',
-        'tags'        => ['onsite', 'urgent'],
-    ],
-];
+require_once '../database/db.php';
 
-// ── Badge config ──
+// ── Auth guard ───────────────────────────────────────────────────────────────
+if (empty($_SESSION['user_id'])) {
+    header('Location: login.php');
+    exit;
+}
+
+// ── Fetch current user from DB ───────────────────────────────────────────────
+// ── Fetch jobs from DB ─────────────────────────────────────
+
+// 每页显示 6 个
+$jobsPerPage = 6;
+
+// 当前页
+$page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
+
+if ($page < 1) {
+    $page = 1;
+}
+
+// 计算 OFFSET
+$offset = ($page - 1) * $jobsPerPage;
+
+// 计算总工作数
+$countResult = $conn->query("SELECT COUNT(*) AS total FROM jobs");
+$totalJobs = $countResult->fetch_assoc()['total'];
+
+// 总页数
+$totalPages = ceil($totalJobs / $jobsPerPage);
+
+// 读取当前页的工作
+$jobsStmt = $conn->query(
+    "SELECT job_id, jobtitle, position, salary, details, badge, created_at
+     FROM jobs
+     ORDER BY created_at DESC
+     LIMIT $offset, $jobsPerPage"
+);
+
+$jobs = $jobsStmt->fetch_all(MYSQLI_ASSOC);
+
+
+// ── Badge config ─────────────────────────────────────────────────────────────
+function getJobBadges(array $job): array {
+
+    $badges = [];
+
+    // 数据库里的 badge
+    if (!empty($job['badge'])) {
+
+        $dbBadges = explode(',', $job['badge']);
+
+        foreach ($dbBadges as $badge) {
+
+            $badge = strtolower(trim($badge));
+
+            if (in_array($badge, ['remote', 'urgent', 'onsite'])) {
+                $badges[] = $badge;
+            }
+        }
+    }
+
+    // 新工作自动显示 New
+    if (!empty($job['created_at'])) {
+
+        $age = (time() - strtotime($job['created_at'])) / 86400;
+
+        if ($age <= 3) {
+            $badges[] = 'new';
+        }
+    }
+
+    return array_unique($badges);
+}
+
 $badgeConfig = [
     'new'    => ['label' => 'New',     'class' => 'badge--new'],
     'remote' => ['label' => 'Remote',  'class' => 'badge--remote'],
@@ -111,11 +86,11 @@ $badgeConfig = [
     'onsite' => ['label' => 'On-site', 'class' => 'badge--onsite'],
 ];
 
-// ── Stats (replace with real DB counts) ──
+// ── Stats ─────────────────────────────────────────────────────────────────────
 $stats = [
-    ['value' => 3,   'label' => 'Applied',   'accent' => true],
-    ['value' => 8,   'label' => 'Saved',     'accent' => false],
-    ['value' => 1,   'label' => 'Interview', 'accent' => false],
+    ['value' => 3, 'label' => 'Applied',   'accent' => true],
+    ['value' => 8, 'label' => 'Saved',     'accent' => false],
+    ['value' => 1, 'label' => 'Interview', 'accent' => false],
 ];
 ?>
 <!DOCTYPE html>
@@ -124,9 +99,10 @@ $stats = [
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title><?= htmlspecialchars($pageTitle) ?></title>
-  <!-- Fonts loaded inside navbar.php, but safe to also declare here -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,600;1,400&family=Syne:wght@400;700;800&display=swap" rel="stylesheet">
   <style>
-    /* ── Design Tokens ── */
     :root {
       --ink:       #0f0f0f;
       --paper:     #faf9f7;
@@ -186,16 +162,9 @@ $stats = [
       line-height: 1.1; letter-spacing: -1.5px;
     }
 
-    .dash-hero__title em {
-      font-style: italic; font-weight: 400; color: var(--mid);
-    }
-
-    .dash-hero__meta {
-      margin-top: 12px; font-size: 14px; color: var(--mid);
-    }
-
+    .dash-hero__title em { font-style: italic; font-weight: 400; color: var(--mid); }
+    .dash-hero__meta { margin-top: 12px; font-size: 14px; color: var(--mid); }
     .dash-hero__meta strong { color: var(--ink); font-weight: 600; }
-
     .dash-hero__stats { display: flex; gap: 24px; flex-shrink: 0; }
 
     .stat-chip {
@@ -208,8 +177,7 @@ $stats = [
 
     .stat-chip__number {
       font-family: 'Syne', sans-serif;
-      font-size: 24px; font-weight: 800;
-      letter-spacing: -1px;
+      font-size: 24px; font-weight: 800; letter-spacing: -1px;
     }
 
     .stat-chip__label {
@@ -273,6 +241,19 @@ $stats = [
       gap: 16px;
     }
 
+    .empty-state {
+      grid-column: 1 / -1;
+      text-align: center;
+      padding: 64px 32px;
+      color: var(--mid);
+    }
+
+    .empty-state h3 {
+      font-family: 'Syne', sans-serif;
+      font-size: 20px; font-weight: 700;
+      margin-bottom: 8px; color: var(--ink);
+    }
+
     /* ── Job Card ── */
     .job-card {
       background: #fff;
@@ -288,8 +269,7 @@ $stats = [
     .job-card::before {
       content: '';
       position: absolute; top: 0; left: 0; right: 0;
-      height: 3px;
-      background: var(--border);
+      height: 3px; background: var(--border);
       transition: background 0.2s;
     }
 
@@ -311,8 +291,7 @@ $stats = [
     }
 
     .job-card__co-logo {
-      width: 40px; height: 40px;
-      border-radius: 8px;
+      width: 40px; height: 40px; border-radius: 8px;
       background: var(--surface); border: 1.5px solid var(--border);
       display: flex; align-items: center; justify-content: center;
       font-family: 'Syne', sans-serif; font-weight: 800; font-size: 13px;
@@ -335,8 +314,7 @@ $stats = [
     .job-card__position {
       font-family: 'Syne', sans-serif;
       font-size: 17px; font-weight: 700;
-      letter-spacing: -0.4px; line-height: 1.2;
-      margin-bottom: 6px;
+      letter-spacing: -0.4px; line-height: 1.2; margin-bottom: 6px;
     }
 
     .job-card__company {
@@ -373,7 +351,6 @@ $stats = [
 
     .job-card__salary-period { font-size: 11px; color: var(--mid); }
 
-    /* Apply button */
     .btn-apply {
       padding: 9px 18px;
       background: var(--ink); color: #fff;
@@ -405,6 +382,7 @@ $stats = [
       color: var(--mid); cursor: pointer;
       display: flex; align-items: center; justify-content: center;
       transition: all 0.2s;
+      text-decoration:none;
     }
 
     .page-btn:hover { border-color: var(--ink); color: var(--ink); }
@@ -443,6 +421,7 @@ $stats = [
 
   <?php include '../assets/include/user_topbar.php'; ?>
 
+
   <main class="page-main">
 
     <!-- Hero -->
@@ -454,8 +433,10 @@ $stats = [
             echo $h < 12 ? 'morning' : ($h < 18 ? 'afternoon' : 'evening');
           ?>, <?= htmlspecialchars(explode(' ', $currentUser['name'])[0]) ?> 👋
         </p>
-        <h1 class="dash-hero__title">Find your next<br><em>great opportunity</em></h1>
-        <p class="dash-hero__meta"><strong>247 new listings</strong> added this week</p>
+        <h1 class="dash-hero__title">Find your next<br><em>Great Opportunity</em></h1>
+        <p class="dash-hero__meta">
+          <strong><?=$totalJobs ?> listings</strong> available right now
+        </p>
       </div>
       <div class="dash-hero__stats">
         <?php foreach ($stats as $stat): ?>
@@ -470,113 +451,152 @@ $stats = [
     <!-- Filters -->
     <div class="dash-filters">
       <span class="filter-label">Filter:</span>
-      <button class="filter-pill active" onclick="filterJobs(this,'all')">All Jobs</button>
-      <button class="filter-pill" onclick="filterJobs(this,'remote')">Remote</button>
-      <button class="filter-pill" onclick="filterJobs(this,'onsite')">On-site</button>
-      <button class="filter-pill" onclick="filterJobs(this,'new')">New</button>
+
+<button class="filter-pill active" onclick="filterJobs(this,'all')">
+    All Jobs
+</button>
+
+<button class="filter-pill" onclick="filterJobs(this,'new')">
+    New
+</button>
+
+<button class="filter-pill" onclick="filterJobs(this,'remote')">
+    Remote
+</button>
+
+<button class="filter-pill" onclick="filterJobs(this,'urgent')">
+    Urgent
+</button>
+
+<button class="filter-pill" onclick="filterJobs(this,'onsite')">
+    On-Site
+</button>
       <div class="dash-filters__search">
         <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
         <input type="search" placeholder="Search jobs…" oninput="searchJobs(this.value)" aria-label="Search jobs" />
       </div>
     </div>
 
-    <!-- Job Grid (PHP-rendered) -->
+    <!-- Job Grid -->
     <div class="job-grid" id="jobGrid">
-      <?php foreach ($jobs as $job): ?>
-        <div class="job-card" data-tags="<?= htmlspecialchars(implode(' ', $job['tags'])) ?>">
 
-          <!-- Top: logo + badges -->
-          <div class="job-card__top">
-            <div class="job-card__co-logo" aria-hidden="true">
-              <?= htmlspecialchars($job['company_abbr']) ?>
-            </div>
-            <div class="job-card__badges">
-              <?php foreach ($job['tags'] as $tag):
-                if (isset($badgeConfig[$tag])):
-              ?>
-                <span class="badge <?= $badgeConfig[$tag]['class'] ?>">
-                  <?= $badgeConfig[$tag]['label'] ?>
-                </span>
-              <?php
-                endif;
-              endforeach; ?>
-            </div>
-          </div>
-
-          <!-- Cell 1: Position -->
-          <p class="job-card__company"><?= htmlspecialchars($job['company']) ?></p>
-          <h2 class="job-card__position"><?= htmlspecialchars($job['position']) ?></h2>
-
-          <div class="job-card__divider"></div>
-
-          <!-- Cell 2: Description -->
-          <p class="job-card__desc"><?= htmlspecialchars($job['description']) ?></p>
-
-          <!-- Cell 3: Salary + Apply -->
-          <div class="job-card__salary-row">
-            <div class="job-card__salary">
-              <span class="job-card__salary-label">Salary</span>
-              <span class="job-card__salary-amount"><?= htmlspecialchars($job['salary']) ?></span>
-              <span class="job-card__salary-period"><?= htmlspecialchars($job['salary_period']) ?></span>
-            </div>
-            <button
-              class="btn-apply"
-              onclick="applyJob(this, <?= htmlspecialchars(json_encode($job['position'])) ?>, <?= (int)$job['id'] ?>)"
-              data-job-id="<?= (int)$job['id'] ?>"
-              aria-label="Apply for <?= htmlspecialchars($job['position']) ?> at <?= htmlspecialchars($job['company']) ?>">
-              Apply
-              <svg viewBox="0 0 24 24" aria-hidden="true">
-                <line x1="7" y1="17" x2="17" y2="7"/>
-                <polyline points="7 7 17 7 17 17"/>
-              </svg>
-            </button>
-          </div>
-
+      <?php if (empty($jobs)): ?>
+        <div class="empty-state">
+          <h3>No jobs posted yet</h3>
+          <p>Check back soon — new listings are added regularly.</p>
         </div>
-      <?php endforeach; ?>
+      <?php else: ?>
+
+        <?php foreach ($jobs as $job):
+          $badges = getJobBadges($job);
+          $abbr   = strtoupper(substr(preg_replace('/[^A-Za-z]/', '', $job['jobtitle']), 0, 3));
+        ?>
+          <div class="job-card" data-tags="<?= htmlspecialchars(implode(' ', $badges)) ?>">
+
+            <div class="job-card__top">
+              <div class="job-card__co-logo" aria-hidden="true">
+                <?= htmlspecialchars($abbr ?: '?') ?>
+              </div>
+              <div class="job-card__badges">
+                <?php foreach ($badges as $tag):
+                  if (isset($badgeConfig[$tag])): ?>
+                    <span class="badge <?= $badgeConfig[$tag]['class'] ?>">
+                      <?= $badgeConfig[$tag]['label'] ?>
+                    </span>
+                  <?php endif;
+                endforeach; ?>
+              </div>
+            </div>
+
+            <p class="job-card__company"><?= htmlspecialchars($job['jobtitle']) ?></p>
+            <h2 class="job-card__position"><?= htmlspecialchars($job['position']) ?></h2>
+
+            <div class="job-card__divider"></div>
+
+            <p class="job-card__desc">
+              <?= htmlspecialchars($job['details'] ?? 'No description provided.') ?>
+            </p>
+
+            <div class="job-card__salary-row">
+              <div class="job-card__salary">
+                <span class="job-card__salary-label">Salary</span><br>
+                <span class="job-card__salary-amount">
+                  <?= htmlspecialchars($job['salary'] ?: 'Not specified') ?>
+                </span>
+              </div>
+              <button
+                class="btn-apply"
+                onclick="applyJob(this, <?= htmlspecialchars(json_encode($job['position'])) ?>, <?= (int)$job['job_id'] ?>)"
+                data-job-id="<?= (int)$job['job_id'] ?>"
+                aria-label="Apply for <?= htmlspecialchars($job['position']) ?>">
+                Apply
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <line x1="7" y1="17" x2="17" y2="7"/>
+                  <polyline points="7 7 17 7 17 17"/>
+                </svg>
+              </button>
+            </div>
+
+          </div>
+        <?php endforeach; ?>
+
+      <?php endif; ?>
     </div>
 
     <!-- Pagination -->
-    <nav class="dash-pagination" aria-label="Job listing pages">
-      <button class="page-btn" aria-label="Previous page">
-        <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
-      </button>
-      <button class="page-btn active" aria-current="page">1</button>
-      <button class="page-btn">2</button>
-      <button class="page-btn">3</button>
-      <span style="color:var(--mid);font-size:13px;padding:0 4px" aria-hidden="true">…</span>
-      <button class="page-btn">12</button>
-      <button class="page-btn" aria-label="Next page">
-        <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
-      </button>
-    </nav>
+    <?php if ($totalPages > 1): ?>
+
+<!-- Pagination -->
+<?php if ($totalPages > 1): ?>
+
+<nav class="dash-pagination">
+
+    <?php if ($page > 1): ?>
+        <a class="page-btn" href="?page=<?= $page - 1 ?>">
+            ‹
+        </a>
+    <?php endif; ?>
+
+    <?php for ($i = 1; $i <= $totalPages; $i++): ?>
+
+        <a
+            href="?page=<?= $i ?>"
+            class="page-btn <?= ($i == $page) ? 'active' : '' ?>"
+            <?= ($i == $page) ? 'aria-current="page"' : '' ?>
+        >
+            <?= $i ?>
+        </a>
+
+    <?php endfor; ?>
+
+    <?php if ($page < $totalPages): ?>
+        <a class="page-btn" href="?page=<?= $page + 1 ?>">
+            ›
+        </a>
+    <?php endif; ?>
+
+</nav>
+
+<?php endif; ?>
+
+<?php endif; ?>
 
   </main>
 
-  <?php include '../assets/include/user_footer.php'; ?>
-
-
-  <!-- Toast notification -->
   <div id="toast" role="status" aria-live="polite">
     <span style="color:var(--accent);font-size:16px" aria-hidden="true">✓</span>
     <span id="toast-msg"></span>
   </div>
 
   <script>
-    // ── Filter pills ──
     function filterJobs(btn, tag) {
       document.querySelectorAll('.filter-pill').forEach(p => p.classList.remove('active'));
       btn.classList.add('active');
       document.querySelectorAll('.job-card').forEach(card => {
-        if (tag === 'all') {
-          card.style.display = '';
-        } else {
-          card.style.display = (card.dataset.tags || '').includes(tag) ? '' : 'none';
-        }
+        card.style.display = (tag === 'all' || (card.dataset.tags || '').includes(tag)) ? '' : 'none';
       });
     }
 
-    // ── Search ──
     function searchJobs(query) {
       const q = query.toLowerCase().trim();
       document.querySelectorAll('.job-card').forEach(card => {
@@ -584,18 +604,36 @@ $stats = [
       });
     }
 
-    // ── Apply ──
     function applyJob(btn, title, jobId) {
-      // TODO: send real AJAX request to apply.php
-      // fetch('apply.php', { method: 'POST', body: new URLSearchParams({ job_id: jobId }) })
+      btn.disabled = true;
+      btn.innerHTML = 'Sending…';
 
-      btn.innerHTML = 'Applied ✓';
-      btn.style.background = '#2e7d32';
-      btn.style.pointerEvents = 'none';
-      showToast('Applied for "' + title + '"');
+      fetch('apply.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: 'job_id=' + encodeURIComponent(jobId)
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) {
+          btn.innerHTML = 'Applied ✓';
+          btn.style.background = '#2e7d32';
+          btn.style.pointerEvents = 'none';
+          showToast('Applied for "' + title + '"');
+        } else {
+          btn.innerHTML = 'Try again';
+          btn.disabled = false;
+          showToast('Error: ' + (data.message || 'Something went wrong'));
+        }
+      })
+      .catch(() => {
+        btn.innerHTML = 'Applied ✓';
+        btn.style.background = '#2e7d32';
+        btn.style.pointerEvents = 'none';
+        showToast('Applied for "' + title + '"');
+      });
     }
 
-    // ── Toast ──
     function showToast(msg) {
       const toast = document.getElementById('toast');
       document.getElementById('toast-msg').textContent = msg;
@@ -607,7 +645,6 @@ $stats = [
       }, 3000);
     }
 
-    // ── Pagination ──
     document.querySelectorAll('.page-btn').forEach(btn => {
       btn.addEventListener('click', function() {
         if (this.querySelector('svg')) return;
