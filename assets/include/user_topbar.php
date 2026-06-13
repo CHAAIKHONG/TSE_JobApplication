@@ -59,8 +59,8 @@ $currentUser = $currentUser ?? ['name' => 'Guest', 'initials' => '?', 'notif_cou
 
 $navLinks = [
     'dashboard' => ['label' => 'Dashboard', 'href' => 'dashboard.php'],
-    'companies' => ['label' => 'Companies', 'href' => 'companies.php'],
-    'positions' => ['label' => 'Positions', 'href' => 'positions.php'],
+    // 'companies' => ['label' => 'Companies', 'href' => 'companies.php'],
+    // 'positions' => ['label' => 'Positions', 'href' => 'positions.php'],
     'about'     => ['label' => 'About Us',  'href' => 'about.php'],
 ];
 ?>
