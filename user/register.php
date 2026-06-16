@@ -23,8 +23,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $error = 'Please fill in all required fields.';
     } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
         $error = 'Please enter a valid email address.';
+    } elseif (!empty($phoneNo) && !preg_match('/^\d{1,11}$/', $phoneNo)) {
+        $error = 'Phone number must be digits only and no more than 11 digits.';
     } elseif (strlen($password) < 8) {
         $error = 'Password must be at least 8 characters.';
+    } elseif (!preg_match('/[A-Z]/', $password)) {
+        $error = 'Password must contain at least one uppercase letter (A-Z).';
+    } elseif (!preg_match('/[a-z]/', $password)) {
+        $error = 'Password must contain at least one lowercase letter (a-z).';
+    } elseif (!preg_match('/[0-9]/', $password)) {
+        $error = 'Password must contain at least one number (0-9).';
+    } elseif (!preg_match('/[\W_]/', $password)) {
+        $error = 'Password must contain at least one special character (e.g. !@#$%).';
     } elseif ($password !== $confirm) {
         $error = 'Passwords do not match.';
     } else {
@@ -197,7 +207,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     .auth-left-title span { color: #E05A1E; }
     .auth-left-desc { font-size: 13px; color: rgba(255,255,255,0.5); line-height: 1.7; margin: 0 0 2rem; }
 
-    /* steps list */
     .steps-list { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 14px; }
 
     .steps-list li {
@@ -265,6 +274,58 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     .field-input:focus { border-color: #E05A1E; }
     .field-input::placeholder { color: #bbb; }
+    .field-input.input-error { border-color: #e05252 !important; }
+    .field-input.input-ok    { border-color: #4caf50 !important; }
+
+    /* 密码强度条 */
+    .pw-strength { margin-top: 6px; }
+
+    .pw-bar-track {
+        height: 4px;
+        background: #e8e6e0;
+        border-radius: 4px;
+        overflow: hidden;
+    }
+
+    .pw-bar-fill {
+        height: 100%;
+        width: 0%;
+        border-radius: 4px;
+        transition: width 0.3s, background 0.3s;
+    }
+
+    .pw-rules {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 5px;
+        margin-top: 7px;
+    }
+
+    .pw-rule {
+        font-size: 10px;
+        padding: 2px 7px;
+        border-radius: 20px;
+        border: 1px solid #e8e6e0;
+        color: #aaa;
+        background: #fafafa;
+        transition: all 0.2s;
+    }
+
+    .pw-rule.ok {
+        color: #3a8a3a;
+        background: #eaf3de;
+        border-color: #b8dfa0;
+    }
+
+    /* 提示文字 */
+    .field-hint {
+        font-size: 11px;
+        margin-top: 4px;
+        display: none;
+    }
+
+    .field-hint.error { color: #c0392b; display: block; }
+    .field-hint.ok    { color: #3a8a3a;  display: block; }
 
     .resume-upload {
         border: 1.5px dashed #d0cdc5;
@@ -295,19 +356,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     .auth-switch a { color: #E05A1E; font-weight: 500; text-decoration: none; }
 
     .alert-error {
-        background: #fdf0f0; border: 1px solid #f7c1c1;
-        color: #a32d2d; border-radius: 10px;
-        padding: 10px 14px; font-size: 13px; margin-bottom: 1rem;
+        background: #fdf0f0;
+        border: 1px solid #f7c1c1;
+        color: #a32d2d;
+        border-radius: 10px;
+        padding: 10px 14px;
+        font-size: 13px;
+        margin-bottom: 1rem;
     }
 
     /* success state */
     .success-box { text-align: center; padding: 2rem 0; }
+
     .success-icon {
         width: 60px; height: 60px;
         background: #eaf3de; border-radius: 50%;
         display: flex; align-items: center; justify-content: center;
         margin: 0 auto 1rem; font-size: 28px;
     }
+
     .success-title { font-family: 'Syne', sans-serif; font-size: 22px; font-weight: 700; color: #1a1a1a; margin: 0 0 6px; }
     .success-sub   { font-size: 13px; color: #888; margin: 0 0 1.5rem; }
 
@@ -319,6 +386,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         cursor: pointer; text-decoration: none; display: block;
         text-align: center; transition: background 0.2s;
     }
+
     .btn-dark:hover { background: #333; }
 
     #file-name { font-size: 12px; color: #E05A1E; margin: 4px 0 0; display: none; }
@@ -384,7 +452,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <div class="alert-error"><?= htmlspecialchars($error) ?></div>
                 <?php endif; ?>
 
-                <form method="POST" action="register.php" enctype="multipart/form-data">
+                <form method="POST" action="register.php" enctype="multipart/form-data" id="regForm" novalidate>
+
                     <div class="field-row">
                         <div class="field-group">
                             <label class="field-label">Full Name</label>
@@ -393,25 +462,48 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         </div>
                         <div class="field-group">
                             <label class="field-label">Phone <span class="opt">(optional)</span></label>
-                            <input class="field-input" type="tel" name="phoneNo" placeholder="+60 12-345 6789"
-                                   value="<?= htmlspecialchars($_POST['phoneNo'] ?? '') ?>" />
+                            <input class="field-input" type="tel" name="phoneNo" id="phoneNo"
+                                   placeholder="e.g. 60123456789" maxlength="11"
+                                   value="<?= htmlspecialchars($_POST['phoneNo'] ?? '') ?>"
+                                   oninput="checkPhone(this)" />
+                            <span class="field-hint" id="phone-hint"></span>
                         </div>
                     </div>
 
                     <div class="field-group">
                         <label class="field-label">Email</label>
-                        <input class="field-input" type="email" name="email" placeholder="jane@example.com"
-                               value="<?= htmlspecialchars($_POST['email'] ?? '') ?>" required />
+                        <input class="field-input" type="email" name="email" id="emailInput"
+                               placeholder="jane@example.com"
+                               value="<?= htmlspecialchars($_POST['email'] ?? '') ?>"
+                               oninput="checkEmail(this)" required />
+                        <span class="field-hint" id="email-hint"></span>
                     </div>
 
                     <div class="field-row">
                         <div class="field-group">
                             <label class="field-label">Password</label>
-                            <input class="field-input" type="password" name="password" placeholder="Min. 8 chars" required />
+                            <input class="field-input" type="password" name="password"
+                                   id="pw" placeholder="Min. 8 chars" required
+                                   oninput="checkPassword(this.value)" />
+                            <div class="pw-strength">
+                                <div class="pw-bar-track">
+                                    <div class="pw-bar-fill" id="pw-bar"></div>
+                                </div>
+                                <div class="pw-rules">
+                                    <span class="pw-rule" id="r-len">8+ chars</span>
+                                    <span class="pw-rule" id="r-upper">A–Z</span>
+                                    <span class="pw-rule" id="r-lower">a–z</span>
+                                    <span class="pw-rule" id="r-num">0–9</span>
+                                    <span class="pw-rule" id="r-sym">!@#$</span>
+                                </div>
+                            </div>
                         </div>
                         <div class="field-group">
                             <label class="field-label">Confirm</label>
-                            <input class="field-input" type="password" name="confirm" placeholder="Re-enter" required />
+                            <input class="field-input" type="password" name="confirm"
+                                   id="confirm" placeholder="Re-enter" required
+                                   oninput="checkConfirm(this.value)" />
+                            <span class="field-hint" id="confirm-hint"></span>
                         </div>
                     </div>
 
@@ -445,6 +537,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 </div>
 
 <script>
+/* ── 显示上传文件名 ── */
 function showFileName(input) {
     const label = document.getElementById('file-name');
     if (input.files.length > 0) {
@@ -452,6 +545,147 @@ function showFileName(input) {
         label.style.display = 'block';
     }
 }
+
+/* ── 电话号码验证：只允许数字，最多 11 位 ── */
+function checkPhone(input) {
+    // 自动过滤非数字字符
+    input.value = input.value.replace(/\D/g, '');
+
+    const hint = document.getElementById('phone-hint');
+
+    if (input.value.length === 0) {
+        input.classList.remove('input-error', 'input-ok');
+        hint.className = 'field-hint';
+        return;
+    }
+
+    if (input.value.length > 11) {
+        input.value = input.value.slice(0, 11);
+    }
+
+    if (input.value.length <= 11 && input.value.length > 0) {
+        input.classList.add('input-ok');
+        input.classList.remove('input-error');
+        hint.textContent = '✓ Valid phone number';
+        hint.className = 'field-hint ok';
+    } else {
+        input.classList.add('input-error');
+        input.classList.remove('input-ok');
+        hint.textContent = '✗ Max 11 digits allowed.';
+        hint.className = 'field-hint error';
+    }
+}
+
+/* ── Email 格式验证 ── */
+function checkEmail(input) {
+    const hint = document.getElementById('email-hint');
+    const val  = input.value.trim();
+    const valid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val);
+
+    if (!val) {
+        input.classList.remove('input-error', 'input-ok');
+        hint.className = 'field-hint';
+        return;
+    }
+
+    if (valid) {
+        input.classList.add('input-ok');
+        input.classList.remove('input-error');
+        hint.className = 'field-hint';
+    } else {
+        input.classList.add('input-error');
+        input.classList.remove('input-ok');
+        hint.textContent = '✗ Please enter a valid email address.';
+        hint.className = 'field-hint error';
+    }
+}
+
+/* ── 密码规则定义 ── */
+const pwRules = {
+    'r-len':   v => v.length >= 8,
+    'r-upper': v => /[A-Z]/.test(v),
+    'r-lower': v => /[a-z]/.test(v),
+    'r-num':   v => /[0-9]/.test(v),
+    'r-sym':   v => /[\W_]/.test(v),
+};
+
+const barColors = ['#e05252', '#e07d1e', '#e0c01e', '#7db83a', '#3a8a3a'];
+
+/* ── 密码强度实时检查 ── */
+function checkPassword(val) {
+    let passed = 0;
+
+    for (const [id, fn] of Object.entries(pwRules)) {
+        const el = document.getElementById(id);
+        if (fn(val)) {
+            el.classList.add('ok');
+            passed++;
+        } else {
+            el.classList.remove('ok');
+        }
+    }
+
+    const bar = document.getElementById('pw-bar');
+    bar.style.width      = (passed / 5 * 100) + '%';
+    bar.style.background = passed > 0 ? barColors[passed - 1] : '#e8e6e0';
+
+    // 同步刷新 confirm 提示
+    const c = document.getElementById('confirm');
+    if (c.value) checkConfirm(c.value);
+}
+
+/* ── 确认密码实时比对 ── */
+function checkConfirm(val) {
+    const pw   = document.getElementById('pw').value;
+    const hint = document.getElementById('confirm-hint');
+    const inp  = document.getElementById('confirm');
+
+    if (!val) {
+        inp.classList.remove('input-error', 'input-ok');
+        hint.className = 'field-hint';
+        return;
+    }
+
+    if (val === pw) {
+        inp.classList.add('input-ok');
+        inp.classList.remove('input-error');
+        hint.textContent = '✓ Passwords match';
+        hint.className   = 'field-hint ok';
+    } else {
+        inp.classList.add('input-error');
+        inp.classList.remove('input-ok');
+        hint.textContent = '✗ Passwords do not match';
+        hint.className   = 'field-hint error';
+    }
+}
+
+/* ── 提交前最终拦截 ── */
+document.getElementById('regForm').addEventListener('submit', function(e) {
+    const pw  = document.getElementById('pw').value;
+    const cfg = document.getElementById('confirm').value;
+    const ph  = document.getElementById('phoneNo').value;
+
+    // 检查全部密码规则
+    const allPassed = Object.values(pwRules).every(fn => fn(pw));
+    if (!allPassed) {
+        e.preventDefault();
+        alert('Your password does not meet the requirements. Please check all the rules below the password field.');
+        return;
+    }
+
+    // 密码一致性
+    if (pw !== cfg) {
+        e.preventDefault();
+        alert('Passwords do not match. Please re-enter your confirm password.');
+        return;
+    }
+
+    // 电话号码（填写时才验证）
+    if (ph && !/^\d{1,11}$/.test(ph)) {
+        e.preventDefault();
+        alert('Phone number must be digits only, maximum 11 digits.');
+    }
+});
 </script>
 
-<?php include '../assets/include/user_footer.php'; ?>   
+<?php include '../assets/include/user_footer.php'; ?>
