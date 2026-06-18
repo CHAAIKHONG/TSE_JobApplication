@@ -81,7 +81,7 @@ $jobs_list = mysqli_query($conn, "SELECT * FROM jobs ORDER BY job_id DESC");
     
     <style>
         :root {
-            --color-primary: #7380ec;
+            --color-primary: #e85d26;
             --color-danger: #ff7782;
             --color-success: #41f1b6;
             --color-warning: #ffbb55;
@@ -90,7 +90,7 @@ $jobs_list = mysqli_query($conn, "SELECT * FROM jobs ORDER BY job_id DESC");
             --color-info-light: #dce1eb;
             --color-dark: #363949;
             --color-light: rgba(132, 139, 200, 0.18);
-            --color-primary-variant: #111e88;
+            --color-primary-variant: #b44519;
             --color-dark-variant: #677483;
             --color-background: #f6f6f9;
         }
@@ -103,9 +103,24 @@ $jobs_list = mysqli_query($conn, "SELECT * FROM jobs ORDER BY job_id DESC");
         h1 { font-weight: 800; font-size: 1.8rem; }
         h2 { font-size: 1.4rem; margin-bottom: 1rem; }
         .danger { color: var(--color-danger); }
+        
         aside { height: 100vh; }
         aside .top { background: white; display: flex; align-items: center; justify-content: center; margin-top: 1.4rem; border-radius: 0.4rem; padding: 1.5rem; }
-        aside .logo h2 { font-size: 1.5rem; }
+        
+        /* --- 优化的 Logo 设计 --- */
+        aside .logo { display: flex; gap: 12px; align-items: center; justify-content: center; }
+        .logo-mark {
+            width: 38px; height: 38px; background: #111; border-radius: 10px; display: flex; align-items: center; justify-content: center;
+            position: relative; overflow: hidden; flex-shrink: 0; box-shadow: 0 6px 12px rgba(232, 93, 38, 0.25);
+        }
+        .logo-mark::after {
+            content: ''; position: absolute; bottom: 0; right: 0; width: 16px; height: 16px; background: var(--color-primary); border-radius: 8px 0 0 0;
+        }
+        .logo-mark svg { width: 18px; height: 18px; position: relative; z-index: 1; stroke: #fff;}
+        aside .logo h2 { font-size: 1.6rem; font-weight: 800; margin: 0; letter-spacing: -0.5px; display: flex; gap: 4px; align-items: baseline; }
+        aside .logo h2 span.primary { color: var(--color-primary); }
+        /* ------------------------ */
+
         aside .sidebar { background: rgb(255, 255, 255); display: flex; flex-direction: column; height: 86vh; position: relative; top: 1rem; border-radius: 0.4rem; padding-top: 2rem; }
         aside .sidebar a { display: flex; color: var(--color-info-dark); margin-left: 2rem; gap: 1rem; align-items: center; position: relative; height: 3.7rem; transition: all 300ms ease; }
         aside .sidebar a span { font-size: 1.6rem; transition: all 300ms ease; }
@@ -114,25 +129,51 @@ $jobs_list = mysqli_query($conn, "SELECT * FROM jobs ORDER BY job_id DESC");
         aside .sidebar a.active span { color: var(--color-primary); margin-left: calc(1rem - 3px); }
         aside .sidebar a:hover { color: var(--color-primary); }
         aside .sidebar a:hover span { margin-left: 1rem; }
+        
+        /* --- 独立的 Logout 按钮设计 --- */
+        aside .sidebar a.logout-btn {
+            margin-top: auto; 
+            margin-bottom: 2rem;
+            margin-left: 1.5rem;
+            margin-right: 1.5rem;
+            border: 2px solid var(--color-info-light);
+            border-radius: 50px;
+            justify-content: center;
+            color: var(--color-info-dark);
+            transition: all 0.3s ease;
+        }
+        aside .sidebar a.logout-btn:hover {
+            background: #ffeaea; 
+            border-color: var(--color-danger);
+            color: var(--color-danger);
+        }
+        aside .sidebar a.logout-btn:hover span {
+            margin-left: 0; 
+        }
+
         main { margin-top: 1.4rem; padding-bottom: 3rem; }
         .form-section, .table-section { background: white; padding: 1.8rem; border-radius: 2rem; margin-top: 1.5rem; box-shadow: 0 2rem 3rem var(--color-light); }
         .form-group { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-bottom: 1rem; }
-        input, textarea { padding: 1rem; border-radius: 0.4rem; border: 1px solid var(--color-light); background: var(--color-background); color: var(--color-dark); font-size: 0.9rem; width: 100%; }
+        input, textarea { padding: 1rem; border-radius: 0.4rem; border: 1px solid var(--color-light); background: var(--color-background); color: var(--color-dark); font-size: 0.9rem; width: 100%; transition: all 0.3s ease; }
         textarea { grid-column: span 3; height: 80px; resize: none; }
-        input:focus, textarea:focus { border-color: var(--color-primary); }
-        .btn { padding: 0.8rem 1.5rem; border-radius: 0.4rem; font-weight: bold; cursor: pointer; color: white; transition: all 300ms ease; }
+        input:focus, textarea:focus { border-color: var(--color-primary); box-shadow: 0 0 0 2px rgba(232, 93, 38, 0.1); }
+        
+        .btn { padding: 0.8rem 1.5rem; border-radius: 0.4rem; font-weight: bold; cursor: pointer; color: white; transition: all 300ms ease; text-align: center; border: none;}
         .btn-primary { background: var(--color-primary); }
-        .btn-primary:hover { background: var(--color-primary-variant); }
+        .btn-primary:hover { background: var(--color-primary-variant); transform: translateY(-2px); }
         .btn-danger { background: var(--color-danger); padding: 0.4rem 0.8rem; font-size: 0.8rem; }
+        .btn-danger:hover { background: #e0606b; transform: translateY(-1px); }
         .btn-warning { background: var(--color-warning); padding: 0.4rem 0.8rem; font-size: 0.8rem; color: #333; }
+        .btn-warning:hover { background: #e6a84d; transform: translateY(-1px); }
+        
         .alert { padding: 1rem; margin-top: 1rem; border-radius: 0.4rem; font-weight: 500; }
-        .alert.success { background: rgba(65, 241, 182, 0.2); color: #2e8b57; }
-        .alert.danger { background: rgba(255, 119, 130, 0.1); color: var(--color-danger); }
+        .alert.success { background: rgba(65, 241, 182, 0.2); color: #2e8b57; border: 1px solid #41f1b6; }
+        .alert.danger { background: rgba(255, 119, 130, 0.1); color: var(--color-danger); border: 1px solid var(--color-danger); }
         table { width: 100%; border-collapse: collapse; margin-top: 1rem; text-align: left; }
         th, td { padding: 1.2rem; border-bottom: 1px solid var(--color-light); }
         th { color: var(--color-info-dark); }
         tr:last-child td { border: none; }
-        .actions { display: flex; gap: 0.5rem; }
+        .actions { display: flex; gap: 0.5rem; align-items: center;}
     </style>
 </head>
 
@@ -141,7 +182,10 @@ $jobs_list = mysqli_query($conn, "SELECT * FROM jobs ORDER BY job_id DESC");
         <aside>
             <div class="top">
                 <div class="logo">
-                    <h2>HR <span class="danger">SYSTEM</span></h2>
+                    <div class="logo-mark">
+                        <svg viewBox="0 0 16 16"><path d="M2 12 L8 4 L14 12" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    </div>
+                    <h2>HR<span class="primary">SYSTEM</span></h2>
                 </div>
             </div>
 
@@ -158,7 +202,11 @@ $jobs_list = mysqli_query($conn, "SELECT * FROM jobs ORDER BY job_id DESC");
                     <span class="material-symbols-sharp">description</span>
                     <h3>User Management</h3>
                 </a>
-                <a href="logout.php">
+                <a href="manage_company.php">
+                    <span class="material-symbols-sharp">business</span>
+                    <h3>Company Management</h3>
+                </a>
+                <a href="admin_login.php" class="logout-btn">
                     <span class="material-symbols-sharp">logout</span>
                     <h3>Logout</h3>
                 </a>
@@ -184,7 +232,7 @@ $jobs_list = mysqli_query($conn, "SELECT * FROM jobs ORDER BY job_id DESC");
                             <textarea name="details" placeholder="Job Details / Requirements" required><?php echo htmlspecialchars($edit_job['details']); ?></textarea>
                         </div>
                         <button type="submit" name="update_job" class="btn btn-primary">Update Job</button>
-                        <a href="manage_jobs.php" style="margin-left: 1rem; color: var(--color-info-dark);">Cancel</a>
+                        <a href="manage_jobs.php" style="margin-left: 1rem; color: var(--color-info-dark); text-decoration: underline;">Cancel</a>
                     </form>
                 <?php else: ?>
                     <h2>Create New Job Post</h2>
@@ -218,9 +266,9 @@ $jobs_list = mysqli_query($conn, "SELECT * FROM jobs ORDER BY job_id DESC");
                             <?php while($row = mysqli_fetch_assoc($jobs_list)): ?>
                                 <tr>
                                     <td><?php echo $row['job_id']; ?></td>
-                                    <td><b><?php echo htmlspecialchars($row['jobtitle']); ?></b></td>
+                                    <td><b style="color: var(--color-dark);"><?php echo htmlspecialchars($row['jobtitle']); ?></b></td>
                                     <td><?php echo htmlspecialchars($row['position']); ?></td>
-                                    <td class="primary"><?php echo htmlspecialchars($row['salary']); ?></td>
+                                    <td style="color: var(--color-primary); font-weight: 600;">RM <?php echo htmlspecialchars($row['salary']); ?></td>
                                     <td><?php echo htmlspecialchars(substr($row['details'], 0, 50)) . (strlen($row['details']) > 50 ? '...' : ''); ?></td>
                                     <td class="actions">
                                         <a href="manage_jobs.php?edit=<?php echo $row['job_id']; ?>" class="btn btn-warning">Edit</a>

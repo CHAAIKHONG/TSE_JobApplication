@@ -71,7 +71,7 @@ $applications_list = mysqli_query($conn, $sql);
     
     <style>
         :root {
-            --color-primary: #7380ec;
+            --color-primary: #e85d26;
             --color-danger: #ff7782;
             --color-success: #41f1b6;
             --color-warning: #ffbb55;
@@ -80,12 +80,12 @@ $applications_list = mysqli_query($conn, $sql);
             --color-info-light: #dce1eb;
             --color-dark: #363949;
             --color-light: rgba(132, 139, 200, 0.18);
-            --color-primary-variant: #111e88;
+            --color-primary-variant: #b44519;
             --color-dark-variant: #677483;
             --color-background: #f6f6f9;
         }
 
-        /* 核心重置，与 manage_jobs.php 保持完全一致 */
+        /* 核心重置 */
         * { margin: 0; padding: 0; outline: 0; appearance: none; border: 0; text-decoration: none; list-style: none; box-sizing: border-box; }
         html { font-size: 14px; }
         body { width: 100vw; height: 100vh; font-family: poppins, sans-serif; font-size: 0.88rem; background: var(--color-background); user-select: none; overflow-x: hidden; color: var(--color-dark); }
@@ -95,26 +95,59 @@ $applications_list = mysqli_query($conn, $sql);
         h1 { font-weight: 800; font-size: 1.8rem; margin-bottom: 1rem; }
         .danger { color: var(--color-danger); }
 
-        /* Sidebar 样式与 jobs 一模一样 */
+        /* --- 优化的 Logo 设计 --- */
         aside { height: 100vh; }
         aside .top { background: white; display: flex; align-items: center; justify-content: center; margin-top: 1.4rem; border-radius: 0.4rem; padding: 1.5rem; }
-        aside .logo h2 { font-size: 1.5rem; }
+        
+        aside .logo { display: flex; gap: 12px; align-items: center; justify-content: center; }
+        .logo-mark {
+            width: 38px; height: 38px; background: #111; border-radius: 10px; display: flex; align-items: center; justify-content: center;
+            position: relative; overflow: hidden; flex-shrink: 0; box-shadow: 0 6px 12px rgba(232, 93, 38, 0.25);
+        }
+        .logo-mark::after {
+            content: ''; position: absolute; bottom: 0; right: 0; width: 16px; height: 16px; background: var(--color-primary); border-radius: 8px 0 0 0;
+        }
+        .logo-mark svg { width: 18px; height: 18px; position: relative; z-index: 1; stroke: #fff;}
+        aside .logo h2 { font-size: 1.6rem; font-weight: 800; margin: 0; letter-spacing: -0.5px; display: flex; gap: 4px; align-items: baseline; }
+        aside .logo h2 span.primary { color: var(--color-primary); }
+        /* ------------------------ */
+
         aside .sidebar { background: rgb(255, 255, 255); display: flex; flex-direction: column; height: 86vh; position: relative; top: 1rem; border-radius: 0.4rem; padding-top: 2rem; }
         aside .sidebar a { display: flex; color: var(--color-info-dark); margin-left: 2rem; gap: 1rem; align-items: center; position: relative; height: 3.7rem; transition: all 300ms ease; }
         aside .sidebar a span { font-size: 1.6rem; transition: all 300ms ease; }
-        
-        /* 修复了 active 状态乱跑的问题 */
         aside .sidebar a.active { background: var(--color-light); color: var(--color-primary); margin-left: 0; }
         aside .sidebar a.active:before { content: ""; width: 6px; height: 100%; background: var(--color-primary); }
         aside .sidebar a.active span { color: var(--color-primary); margin-left: calc(1rem - 3px); }
         aside .sidebar a:hover { color: var(--color-primary); }
         aside .sidebar a:hover span { margin-left: 1rem; }
 
+        /* --- 独立的 Logout 按钮设计 --- */
+        aside .sidebar a.logout-btn {
+            margin-top: auto; 
+            margin-bottom: 2rem;
+            margin-left: 1.5rem;
+            margin-right: 1.5rem;
+            border: 2px solid var(--color-info-light);
+            border-radius: 50px;
+            justify-content: center;
+            color: var(--color-info-dark);
+            transition: all 0.3s ease;
+        }
+        aside .sidebar a.logout-btn:hover {
+            background: #ffeaea; 
+            border-color: var(--color-danger);
+            color: var(--color-danger);
+        }
+        aside .sidebar a.logout-btn:hover span {
+            margin-left: 0; 
+        }
+
         main { margin-top: 1.4rem; padding-bottom: 3rem; }
 
         /* 提示块 */
         .alert { padding: 1rem; margin-bottom: 1.5rem; border-radius: 0.4rem; font-weight: 500; }
-        .alert.success { background: rgba(65, 241, 182, 0.2); color: #2e8b57; }
+        .alert.success { background: rgba(65, 241, 182, 0.2); color: #2e8b57; border: 1px solid #41f1b6; }
+        .alert.danger { background: rgba(255, 119, 130, 0.1); color: var(--color-danger); border: 1px solid var(--color-danger); }
 
         /* Filter Section 优化统一 */
         .filter-box { margin-bottom: 1.5rem; display: flex; gap: 1rem; align-items: center; }
@@ -137,12 +170,12 @@ $applications_list = mysqli_query($conn, $sql);
         .badge-rejected { background: #f5f5f5; color: #616161; }
 
         /* 操作 Buttons */
-        .btn { padding: 0.4rem 0.8rem; border-radius: 0.4rem; font-weight: bold; cursor: pointer; color: white; transition: all 300ms ease; font-size: 0.8rem; text-align: center; display: inline-block; }
+        .btn { padding: 0.5rem 1rem; border-radius: 0.4rem; font-weight: bold; cursor: pointer; color: white; transition: all 300ms ease; font-size: 0.8rem; text-align: center; border: none; }
         .btn-success { background: #2e7d32; }
-        .btn-success:hover { background: #1b5e20; }
+        .btn-success:hover { background: #1b5e20; transform: translateY(-1px); }
         .btn-danger { background: var(--color-danger); }
-        .btn-danger:hover { background: #d32f2f; }
-        .actions { display: flex; gap: 0.5rem; }
+        .btn-danger:hover { background: #e0606b; transform: translateY(-1px); }
+        .actions { display: flex; gap: 0.5rem; align-items: center; }
     </style>
 </head>
 
@@ -151,7 +184,10 @@ $applications_list = mysqli_query($conn, $sql);
         <aside>
             <div class="top">
                 <div class="logo">
-                    <h2>HR <span class="danger">SYSTEM</span></h2>
+                    <div class="logo-mark">
+                        <svg viewBox="0 0 16 16"><path d="M2 12 L8 4 L14 12" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    </div>
+                    <h2>HR<span class="primary">SYSTEM</span></h2>
                 </div>
             </div>
 
@@ -165,10 +201,15 @@ $applications_list = mysqli_query($conn, $sql);
                     <h3>Job Management</h3>
                 </a>
                 <a href="manage_user.php" class="active">
-                    <span class="material-symbols-sharp">people</span>
+                    <span class="material-symbols-sharp">description</span>
                     <h3>User Management</h3>
                 </a>
-                <a href="logout.php">
+                <a href="manage_company.php">
+                    <span class="material-symbols-sharp">business</span>
+                    <h3>Company Management</h3>
+                </a>
+                
+                <a href="admin_login.php" class="logout-btn">
                     <span class="material-symbols-sharp">logout</span>
                     <h3>Logout</h3>
                 </a>
@@ -207,7 +248,7 @@ $applications_list = mysqli_query($conn, $sql);
                         <?php if (mysqli_num_rows($applications_list) > 0): ?>
                             <?php while($row = mysqli_fetch_assoc($applications_list)): ?>
                                 <tr>
-                                    <td><b><?php echo htmlspecialchars($row['name']); ?></b></td>
+                                    <td><b style="color: var(--color-dark);"><?php echo htmlspecialchars($row['name']); ?></b></td>
                                     <td><?php echo htmlspecialchars($row['email']); ?></td>
                                     <td><span style="color: var(--color-primary); font-weight:600;"><?php echo htmlspecialchars($row['jobtitle']); ?></span></td>
                                     <td>
@@ -233,7 +274,7 @@ $applications_list = mysqli_query($conn, $sql);
                                             <a href="manage_user.php?action=accept&app_id=<?php echo $row['application_id']; ?>" class="btn btn-success" onclick="return confirm('Accept this applicant?')">Accept</a>
                                             <a href="manage_user.php?action=reject&app_id=<?php echo $row['application_id']; ?>" class="btn btn-danger" onclick="return confirm('Reject this applicant?')">Reject</a>
                                         <?php else: ?>
-                                            <span style="color: var(--color-info-dark); font-size: 0.8rem;">Decision Made</span>
+                                            <span style="color: var(--color-info-dark); font-size: 0.8rem; font-weight: 600;">Decision Made</span>
                                         <?php endif; ?>
                                     </td>
                                 </tr>

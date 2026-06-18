@@ -33,7 +33,7 @@ try {
     
     <style>
         :root {
-            --color-primary: #7380ec;
+            --color-primary: #e85d26;
             --color-danger: #ff7782;
             --color-success: #41f1b6;
             --color-warning: #ffbb55;
@@ -42,104 +42,86 @@ try {
             --color-info-light: #dce1eb;
             --color-dark: #363949;
             --color-light: rgba(132, 139, 200, 0.18);
-            --color-primary-variant: #111e88;
+            --color-primary-variant: #b44519;
             --color-dark-variant: #677483;
             --color-background: #f6f6f9;
         }
 
-        * {
-            margin: 0; padding: 0; outline: 0; appearance: none; border: 0;
-            text-decoration: none; list-style: none; box-sizing: border-box;
-        }
-
+        /* 核心重置与全局字体同步 */
+        * { margin: 0; padding: 0; outline: 0; appearance: none; border: 0; text-decoration: none; list-style: none; box-sizing: border-box; }
         html { font-size: 14px; }
-
-        body {
-            width: 100vw; height: 100vh;
-            font-family: poppins, sans-serif;
-            font-size: 0.88rem;
-            background: var(--color-background);
-            user-select: none; overflow-x: hidden;
-            color: var(--color-dark);
-        }
-
-        .container {
-            display: grid; width: 96%; margin: 0 auto; gap: 1.8rem;
-            grid-template-columns: 14rem auto; 
-        }
-
+        body { width: 100vw; height: 100vh; font-family: poppins, sans-serif; font-size: 0.88rem; background: var(--color-background); user-select: none; overflow-x: hidden; color: var(--color-dark); }
+        .container { display: grid; width: 96%; margin: 0 auto; gap: 1.8rem; grid-template-columns: 14rem auto; }
+        
         a { color: var(--color-dark); }
-        h1 { font-weight: 800; font-size: 1.8rem; }
-        h2 { font-size: 1.4rem; }
-        h3 { font-size: 0.87rem; }
+        h1 { font-weight: 800; font-size: 1.8rem; margin-bottom: 1rem; }
+        h2 { font-size: 1.4rem; margin-bottom: 1rem; }
         .danger { color: var(--color-danger); }
 
+        /* --- 优化的 Logo 设计 --- */
         aside { height: 100vh; }
-        aside .top {
-            background: white; display: flex; align-items: center;
-            justify-content: center; margin-top: 1.4rem;
-            border-radius: 0.4rem; padding: 1.5rem;
+        aside .top { background: white; display: flex; align-items: center; justify-content: center; margin-top: 1.4rem; border-radius: 0.4rem; padding: 1.5rem; }
+        aside .logo { display: flex; gap: 12px; align-items: center; justify-content: center; }
+        .logo-mark {
+            width: 38px; height: 38px; background: #111; border-radius: 10px; display: flex; align-items: center; justify-content: center;
+            position: relative; overflow: hidden; flex-shrink: 0; box-shadow: 0 6px 12px rgba(232, 93, 38, 0.25);
         }
-        aside .logo { display: flex; gap: 0.8rem; }
-        aside .logo h2 { font-size: 1.5rem; }
-        
-        aside .sidebar {
-            background: rgb(255, 255, 255); display: flex; flex-direction: column;
-            height: 86vh; position: relative; top: 1rem; border-radius: 0.4rem;
-            padding-top: 2rem;
+        .logo-mark::after {
+            content: ''; position: absolute; bottom: 0; right: 0; width: 16px; height: 16px; background: var(--color-primary); border-radius: 8px 0 0 0;
         }
-        aside .sidebar a {
-            display: flex; color: var(--color-info-dark); margin-left: 2rem;
-            gap: 1rem; align-items: center; position: relative; height: 3.7rem;
-            transition: all 300ms ease;
-        }
+        .logo-mark svg { width: 18px; height: 18px; position: relative; z-index: 1; stroke: #fff;}
+        aside .logo h2 { font-size: 1.6rem; font-weight: 800; margin: 0; letter-spacing: -0.5px; display: flex; gap: 4px; align-items: baseline; }
+        aside .logo h2 span.primary { color: var(--color-primary); }
+
+        /* --- Sidebar 设计 --- */
+        aside .sidebar { background: rgb(255, 255, 255); display: flex; flex-direction: column; height: 86vh; position: relative; top: 1rem; border-radius: 0.4rem; padding-top: 2rem; }
+        aside .sidebar a { display: flex; color: var(--color-info-dark); margin-left: 2rem; gap: 1rem; align-items: center; position: relative; height: 3.7rem; transition: all 300ms ease; }
         aside .sidebar a span { font-size: 1.6rem; transition: all 300ms ease; }
         aside .sidebar a.active { background: var(--color-light); color: var(--color-primary); margin-left: 0; }
-        aside .sidebar a.active:before {
-            content: ""; width: 6px; height: 100%; background: var(--color-primary);
-        }
+        aside .sidebar a.active:before { content: ""; width: 6px; height: 100%; background: var(--color-primary); }
         aside .sidebar a.active span { color: var(--color-primary); margin-left: calc(1rem - 3px); }
         aside .sidebar a:hover { color: var(--color-primary); }
         aside .sidebar a:hover span { margin-left: 1rem; }
 
-        main { margin-top: 1.4rem; }
-        main .date {
-            display: inline-block; background: var(--color-light);
-            border-radius: 0.4rem; margin-top: 1rem; padding: 0.5rem 1.6rem;
+        /* --- 独立的 Logout 按钮设计 --- */
+        aside .sidebar a.logout-btn {
+            margin-top: auto; /* 自动推到最底部 */
+            margin-bottom: 2rem;
+            margin-left: 1.5rem;
+            margin-right: 1.5rem;
+            border: 2px solid var(--color-info-light);
+            border-radius: 50px;
+            justify-content: center;
+            color: var(--color-info-dark);
+            transition: all 0.3s ease;
+        }
+        aside .sidebar a.logout-btn:hover {
+            background: #ffeaea; 
+            border-color: var(--color-danger);
+            color: var(--color-danger);
+        }
+        aside .sidebar a.logout-btn:hover span {
+            margin-left: 0; /* 取消 hover 时向右滑动的动画 */
         }
 
-        main .insights {
-            display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.6rem;
-        }
-        main .insights > div {
-            background: white; padding: 1.8rem; border-radius: 2rem;
-            margin-top: 1rem; box-shadow: 0 2rem 3rem var(--color-light);
-            transition: all 300ms ease;
-        }
+        /* --- Main Content (Home 专属样式) --- */
+        main { margin-top: 1.4rem; padding-bottom: 3rem; }
+        main .date { display: inline-block; background: var(--color-light); border-radius: 0.4rem; margin-top: 1rem; padding: 0.5rem 1.6rem; }
+        
+        main .insights { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.6rem; }
+        main .insights > div { background: white; padding: 1.8rem; border-radius: 2rem; margin-top: 1rem; box-shadow: 0 2rem 3rem var(--color-light); transition: all 300ms ease; }
         main .insights > div:hover { box-shadow: none; }
-        main .insights > div span {
-            background: cornflowerblue; padding: 0.5rem; border-radius: 50%;
-            color: #fff; font-size: 2rem; display: inline-block;
-        }
+        main .insights > div span { background: var(--color-primary); padding: 0.5rem; border-radius: 50%; color: #fff; font-size: 2rem; display: inline-block; }
         main .insights > div.total_apps span { background: var(--color-danger); }
-        main .insights > div .middle {
-            display: flex; align-items: center; justify-content: space-between; margin-top: 1rem;
-        }
+        main .insights > div .middle { display: flex; align-items: center; justify-content: space-between; margin-top: 1rem; }
         main .insights h3 { margin: 1rem 0 0.6rem; font-size: 1rem; }
         main .insights h1 { font-size: 2.5rem; }
 
         main .recent-activities { margin-top: 2rem; }
-        main .recent-activities h2 { margin-bottom: 0.8rem; }
-        main .recent-activities table {
-            background: #fff; width: 100%; border-radius: 2rem; padding: 1.8rem;
-            text-align: left; box-shadow: 0 2rem 3rem var(--color-light);
-            transition: all 300ms ease; border-collapse: collapse;
-        }
+        main .recent-activities h2 { margin-bottom: 0.8rem; font-size: 1.4rem;}
+        main .recent-activities table { background: #fff; width: 100%; border-radius: 2rem; padding: 1.8rem; text-align: left; box-shadow: 0 2rem 3rem var(--color-light); transition: all 300ms ease; border-collapse: collapse; }
         main .recent-activities table:hover { box-shadow: none; }
-        main table tbody td {
-            height: 2.8rem; border-bottom: 1px solid var(--color-light);
-            color: var(--color-dark-variant); padding: 1rem;
-        }
+        main table tbody td { height: 2.8rem; border-bottom: 1px solid var(--color-light); color: var(--color-dark-variant); padding: 1rem; }
         main table tbody tr:last-child td { border: none; }
     </style>
 </head>
@@ -149,7 +131,10 @@ try {
         <aside>
             <div class="top">
                 <div class="logo">
-                    <h2>HR <span class="danger">SYSTEM</span></h2>
+                    <div class="logo-mark">
+                        <svg viewBox="0 0 16 16"><path d="M2 12 L8 4 L14 12" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    </div>
+                    <h2>HR<span class="primary">SYSTEM</span></h2>
                 </div>
             </div>
 
@@ -166,7 +151,12 @@ try {
                     <span class="material-symbols-sharp">description</span>
                     <h3>User Management</h3>
                 </a>
-                <a href="admin_login.php">
+                <a href="manage_company.php">
+                    <span class="material-symbols-sharp">business</span>
+                    <h3>Company Management</h3>
+                </a>
+                
+                <a href="admin_login.php" class="logout-btn">
                     <span class="material-symbols-sharp">logout</span>
                     <h3>Logout</h3>
                 </a>
@@ -211,6 +201,9 @@ try {
                         </tr>
                         <tr>
                             <td><b>2. Application Management:</b> View all applications, filter lists, see details, and make Accept/Reject decisions.</td>
+                        </tr>
+                        <tr>
+                            <td><b>3. Company Management:</b> Update company profile, contact details, and organization address.</td>
                         </tr>
                     </tbody>
                 </table>

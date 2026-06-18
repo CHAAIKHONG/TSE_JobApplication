@@ -27,7 +27,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <title>HR Admin Login</title>
     <style>
         :root {
-            --color-primary: #7380ec;
+            --color-primary: #e85d26;
             --color-danger: #ff7782;
             --color-white: #fff;
             --color-dark: #363949;
@@ -109,7 +109,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         }
 
         button:hover {
-            background: #111e88;
+            background: #ffa683;
         }
 
         .error {
