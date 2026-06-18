@@ -158,15 +158,15 @@ try {
                     <span class="material-symbols-sharp">grid_view</span>
                     <h3>Dashboard</h3>
                 </a>
-                <a href="jobs.php">
+                <a href="manage_jobs.php">
                     <span class="material-symbols-sharp">work</span>
                     <h3>Job Management</h3>
                 </a>
-                <a href="applications.php">
+                <a href="manage_user.php">
                     <span class="material-symbols-sharp">description</span>
-                    <h3>Applications</h3>
+                    <h3>User Management</h3>
                 </a>
-                <a href="logout.php">
+                <a href="admin_login.php">
                     <span class="material-symbols-sharp">logout</span>
                     <h3>Logout</h3>
                 </a>
