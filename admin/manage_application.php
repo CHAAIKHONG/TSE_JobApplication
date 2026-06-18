@@ -30,7 +30,9 @@ if (isset($_GET['action']) && isset($_GET['app_id'])) {
             $update_sql = "UPDATE applications SET status = '$new_status' WHERE application_id = $app_id";
             if (mysqli_query($conn, $update_sql)) {
                 $notif_msg = "Your application for the position of '$j_title' has been $new_status.";
-                $insert_notif = "INSERT INTO notifications (user_id, message) VALUES ($u_id, '$notif_msg')";
+                // 修改这一行：
+$safe_msg = mysqli_real_escape_string($conn, $notif_msg);
+$insert_notif = "INSERT INTO notifications (user_id, message) VALUES ($u_id, '$safe_msg')";
                 mysqli_query($conn, $insert_notif);
 
                 $message = "Application has been $new_status and notification sent!";
@@ -89,15 +91,28 @@ $applications_list = mysqli_query($conn, $sql);
         * { margin: 0; padding: 0; outline: 0; appearance: none; border: 0; text-decoration: none; list-style: none; box-sizing: border-box; }
         html { font-size: 14px; }
         body { width: 100vw; height: 100vh; font-family: poppins, sans-serif; font-size: 0.88rem; background: var(--color-background); user-select: none; overflow-x: hidden; color: var(--color-dark); }
-        .container { display: grid; width: 96%; margin: 0 auto; gap: 1.8rem; grid-template-columns: 14rem auto; }
+        .container { display: grid; width: 96%; margin: 0 auto; gap: 1.8rem; grid-template-columns: 15rem auto; }
         
         a { color: var(--color-dark); }
         h1 { font-weight: 800; font-size: 1.8rem; margin-bottom: 1rem; }
+        
+        /* 页面标题胶囊边框设计 */
+        h1.page-title {
+            display: inline-block;
+            border: 2px solid var(--color-dark);
+            border-radius: 50px;
+            padding: 0.6rem 1.8rem;
+            color: var(--color-white);
+            background: var(--color-primary);
+            box-shadow: 0 4px 12px rgba(54, 57, 73, 0.15);
+            margin-bottom: 1.5rem;
+        }
+
         .danger { color: var(--color-danger); }
 
         /* --- 优化的 Logo 设计 --- */
         aside { height: 100vh; }
-        aside .top { background: white; display: flex; align-items: center; justify-content: center; margin-top: 1.4rem; border-radius: 0.4rem; padding: 1.5rem; }
+        aside .top { background: white; display: flex; align-items: center; justify-content: center; margin-top: 1.4rem; border-radius: 0.8rem; padding: 1.5rem; border: 1px solid var(--color-light); }
         
         aside .logo { display: flex; gap: 12px; align-items: center; justify-content: center; }
         .logo-mark {
@@ -112,34 +127,62 @@ $applications_list = mysqli_query($conn, $sql);
         aside .logo h2 span.primary { color: var(--color-primary); }
         /* ------------------------ */
 
-        aside .sidebar { background: rgb(255, 255, 255); display: flex; flex-direction: column; height: 86vh; position: relative; top: 1rem; border-radius: 0.4rem; padding-top: 2rem; }
-        aside .sidebar a { display: flex; color: var(--color-info-dark); margin-left: 2rem; gap: 1rem; align-items: center; position: relative; height: 3.7rem; transition: all 300ms ease; }
-        aside .sidebar a span { font-size: 1.6rem; transition: all 300ms ease; }
-        aside .sidebar a.active { background: var(--color-light); color: var(--color-primary); margin-left: 0; }
-        aside .sidebar a.active:before { content: ""; width: 6px; height: 100%; background: var(--color-primary); }
-        aside .sidebar a.active span { color: var(--color-primary); margin-left: calc(1rem - 3px); }
-        aside .sidebar a:hover { color: var(--color-primary); }
-        aside .sidebar a:hover span { margin-left: 1rem; }
+        /* --- 全新升级的 Sidebar 设计 (带边框、圆角、模块化间距) --- */
+        aside .sidebar { 
+            background: rgb(255, 255, 255); 
+            display: flex; 
+            flex-direction: column; 
+            height: 86vh; 
+            position: relative; 
+            top: 1rem; 
+            border-radius: 1.2rem; 
+            padding-top: 1.5rem; 
+            border: 1px solid var(--color-info-light); 
+            box-shadow: 0 1rem 3rem rgba(0, 0, 0, 0.02); 
+        }
+        aside .sidebar a { 
+            display: flex; 
+            color: var(--color-info-dark); 
+            margin: 0.4rem 1.2rem; 
+            padding: 0.8rem 1.2rem; 
+            gap: 1.2rem; 
+            align-items: center; 
+            position: relative; 
+            border-radius: 0.8rem; 
+            border: 1px solid transparent; 
+            transition: all 0.3s ease; 
+        }
+        aside .sidebar a span { font-size: 1.6rem; transition: all 0.3s ease; }
+        
+        aside .sidebar a.active { 
+            background: rgba(232, 93, 38, 0.08); 
+            color: var(--color-primary); 
+            border: 1px solid rgba(232, 93, 38, 0.4); 
+            box-shadow: inset 0 0 0 1px rgba(255,255,255,0.5); 
+        }
+        aside .sidebar a:hover { 
+            color: var(--color-primary); 
+            background: var(--color-light); 
+            border-color: var(--color-info-light);
+            transform: translateX(4px); 
+        }
+        aside .sidebar a.active:hover { transform: none; border-color: var(--color-primary); }
 
-        /* --- 独立的 Logout 按钮设计 --- */
+        /* --- 独立的 Logout 按钮设计 (修正间距适配新布局) --- */
         aside .sidebar a.logout-btn {
             margin-top: auto; 
-            margin-bottom: 2rem;
-            margin-left: 1.5rem;
-            margin-right: 1.5rem;
+            margin-bottom: 1.5rem;
             border: 2px solid var(--color-info-light);
-            border-radius: 50px;
+            border-radius: 50px; 
             justify-content: center;
             color: var(--color-info-dark);
-            transition: all 0.3s ease;
+            background: transparent;
         }
         aside .sidebar a.logout-btn:hover {
             background: #ffeaea; 
             border-color: var(--color-danger);
             color: var(--color-danger);
-        }
-        aside .sidebar a.logout-btn:hover span {
-            margin-left: 0; 
+            transform: none; 
         }
 
         main { margin-top: 1.4rem; padding-bottom: 3rem; }
@@ -153,12 +196,12 @@ $applications_list = mysqli_query($conn, $sql);
         .filter-box { margin-bottom: 1.5rem; display: flex; gap: 1rem; align-items: center; }
         .filter-box span { font-size: 0.9rem; font-weight: 600; color: var(--color-info-dark); }
         .filter-btn { padding: 0.6rem 1.5rem; border-radius: 2rem; border: 1px solid var(--color-light); background: white; color: var(--color-dark); cursor: pointer; transition: all 0.3s ease; font-weight: 600; font-size: 0.85rem; }
-        .filter-btn:hover { border-color: var(--color-primary); color: var(--color-primary); }
+        .filter-btn:hover { border-color: var(--color-primary); color: var(--color-primary); transform: translateY(-2px); }
         .filter-btn.active { background: var(--color-primary); color: white; border-color: var(--color-primary); }
 
         /* Table Section */
-        .table-section { background: white; padding: 1.8rem; border-radius: 2rem; box-shadow: 0 2rem 3rem var(--color-light); }
-        table { width: 100%; border-collapse: collapse; text-align: left; }
+        .table-section { background: white; padding: 1.8rem; border-radius: 2rem; box-shadow: 0 2rem 3rem var(--color-light); border: 1px solid var(--color-info-light); }
+        table { width: 100%; border-collapse: collapse; margin-top: 1rem; text-align: left; }
         th, td { padding: 1.2rem 1rem; border-bottom: 1px solid var(--color-light); }
         th { color: var(--color-info-dark); font-weight: 600; }
         tr:last-child td { border: none; }
@@ -200,15 +243,26 @@ $applications_list = mysqli_query($conn, $sql);
                     <span class="material-symbols-sharp">work</span>
                     <h3>Job Management</h3>
                 </a>
-                <a href="manage_user.php" class="active">
+                <a href="manage_application.php" class="active"> 
                     <span class="material-symbols-sharp">description</span>
-                    <h3>User Management</h3>
+                    <h3>Application Management</h3>
                 </a>
                 <a href="manage_company.php">
                     <span class="material-symbols-sharp">business</span>
                     <h3>Company Management</h3>
                 </a>
-                
+                <a href="manage_users.php">
+                    <span class="material-symbols-sharp">people</span>
+                    <h3>User Management</h3>
+                </a>
+                <a href="report.php">
+                    <span class="material-symbols-sharp">analytics</span>
+                    <h3>Reports & Analytics</h3>
+                </a>
+                <a href="interviews.php">
+                    <span class="material-symbols-sharp">schedule</span>
+                    <h3>Interviews</h3>
+                </a>
                 <a href="admin_login.php" class="logout-btn">
                     <span class="material-symbols-sharp">logout</span>
                     <h3>Logout</h3>
@@ -217,7 +271,7 @@ $applications_list = mysqli_query($conn, $sql);
         </aside>
 
         <main>
-            <h1>Application Management</h1>
+            <h1 class="page-title">Application Management</h1>
 
             <?php if ($message): ?>
                 <div class="alert <?php echo $messageType; ?>"><?php echo $message; ?></div>
@@ -225,10 +279,10 @@ $applications_list = mysqli_query($conn, $sql);
 
             <div class="filter-box">
                 <span>Filter by:</span>
-                <a href="manage_user.php?status=All" class="filter-btn <?php echo $filter === 'All' ? 'active' : ''; ?>">All</a>
-                <a href="manage_user.php?status=Pending" class="filter-btn <?php echo $filter === 'Pending' ? 'active' : ''; ?>">Pending</a>
-                <a href="manage_user.php?status=Accepted" class="filter-btn <?php echo $filter === 'Accepted' ? 'active' : ''; ?>">Accepted</a>
-                <a href="manage_user.php?status=Rejected" class="filter-btn <?php echo $filter === 'Rejected' ? 'active' : ''; ?>">Rejected</a>
+                <a href="manage_application.php?status=All" class="filter-btn <?php echo $filter === 'All' ? 'active' : ''; ?>">All</a>
+                <a href="manage_application.php?status=Pending" class="filter-btn <?php echo $filter === 'Pending' ? 'active' : ''; ?>">Pending</a>
+                <a href="manage_application.php?status=Accepted" class="filter-btn <?php echo $filter === 'Accepted' ? 'active' : ''; ?>">Accepted</a>
+                <a href="manage_application.php?status=Rejected" class="filter-btn <?php echo $filter === 'Rejected' ? 'active' : ''; ?>">Rejected</a>
             </div>
 
             <div class="table-section">
@@ -252,12 +306,12 @@ $applications_list = mysqli_query($conn, $sql);
                                     <td><?php echo htmlspecialchars($row['email']); ?></td>
                                     <td><span style="color: var(--color-primary); font-weight:600;"><?php echo htmlspecialchars($row['jobtitle']); ?></span></td>
                                     <td>
-                                        <?php if (!empty($row['resume'])): ?>
-                                            <a href="../uploads/<?php echo htmlspecialchars($row['resume']); ?>" target="_blank" style="color: #1565c0; text-decoration: underline;">View Resume</a>
-                                        <?php else: ?>
-                                            <span style="color: var(--color-info-dark);">No Resume</span>
-                                        <?php endif; ?>
-                                    </td>
+    <?php if (!empty($row['resume'])): ?>
+        <a href="/TSE_JobApplication/uploads/resumes/<?php echo htmlspecialchars($row['resume']); ?>" target="_blank" style="color: #1565c0; text-decoration: underline;">View Resume</a>
+    <?php else: ?>
+        <span style="color: var(--color-info-dark);">No Resume</span>
+    <?php endif; ?>
+</td>
                                     <td><?php echo date('d M Y', strtotime($row['applied_at'])); ?></td>
                                     
                                     <td>
@@ -271,8 +325,8 @@ $applications_list = mysqli_query($conn, $sql);
                                     
                                     <td class="actions">
                                         <?php if ($row['status'] === 'Pending'): ?>
-                                            <a href="manage_user.php?action=accept&app_id=<?php echo $row['application_id']; ?>" class="btn btn-success" onclick="return confirm('Accept this applicant?')">Accept</a>
-                                            <a href="manage_user.php?action=reject&app_id=<?php echo $row['application_id']; ?>" class="btn btn-danger" onclick="return confirm('Reject this applicant?')">Reject</a>
+                                            <a href="manage_application.php?action=accept&app_id=<?php echo $row['application_id']; ?>" class="btn btn-success" onclick="return confirm('Accept this applicant?')">Accept</a>
+                                            <a href="manage_application.php?action=reject&app_id=<?php echo $row['application_id']; ?>" class="btn btn-danger" onclick="return confirm('Reject this applicant?')">Reject</a>
                                         <?php else: ?>
                                             <span style="color: var(--color-info-dark); font-size: 0.8rem; font-weight: 600;">Decision Made</span>
                                         <?php endif; ?>

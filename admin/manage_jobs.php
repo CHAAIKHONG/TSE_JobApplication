@@ -98,61 +98,54 @@ $jobs_list = mysqli_query($conn, "SELECT * FROM jobs ORDER BY job_id DESC");
         * { margin: 0; padding: 0; outline: 0; appearance: none; border: 0; text-decoration: none; list-style: none; box-sizing: border-box; }
         html { font-size: 14px; }
         body { width: 100vw; height: 100vh; font-family: poppins, sans-serif; font-size: 0.88rem; background: var(--color-background); user-select: none; overflow-x: hidden; color: var(--color-dark); }
-        .container { display: grid; width: 96%; margin: 0 auto; gap: 1.8rem; grid-template-columns: 14rem auto; }
+        .container { display: grid; width: 96%; margin: 0 auto; gap: 1.8rem; grid-template-columns: 15rem auto; }
+        
         a { color: var(--color-dark); }
         h1 { font-weight: 800; font-size: 1.8rem; }
         h2 { font-size: 1.4rem; margin-bottom: 1rem; }
         .danger { color: var(--color-danger); }
         
+        /* 页面标题胶囊边框设计 */
+        h1.page-title {
+            display: inline-block;
+            border: 2px solid var(--color-dark);
+            border-radius: 50px;
+            padding: 0.6rem 1.8rem;
+            color: var(--color-white);
+            background: var(--color-primary);
+            box-shadow: 0 4px 12px rgba(54, 57, 73, 0.15);
+            margin-bottom: 1.5rem;
+        }
+
+        /* --- Logo 设计 --- */
         aside { height: 100vh; }
-        aside .top { background: white; display: flex; align-items: center; justify-content: center; margin-top: 1.4rem; border-radius: 0.4rem; padding: 1.5rem; }
-        
-        /* --- 优化的 Logo 设计 --- */
+        aside .top { background: white; display: flex; align-items: center; justify-content: center; margin-top: 1.4rem; border-radius: 0.8rem; padding: 1.5rem; border: 1px solid var(--color-light); }
         aside .logo { display: flex; gap: 12px; align-items: center; justify-content: center; }
         .logo-mark {
             width: 38px; height: 38px; background: #111; border-radius: 10px; display: flex; align-items: center; justify-content: center;
             position: relative; overflow: hidden; flex-shrink: 0; box-shadow: 0 6px 12px rgba(232, 93, 38, 0.25);
         }
-        .logo-mark::after {
-            content: ''; position: absolute; bottom: 0; right: 0; width: 16px; height: 16px; background: var(--color-primary); border-radius: 8px 0 0 0;
-        }
+        .logo-mark::after { content: ''; position: absolute; bottom: 0; right: 0; width: 16px; height: 16px; background: var(--color-primary); border-radius: 8px 0 0 0; }
         .logo-mark svg { width: 18px; height: 18px; position: relative; z-index: 1; stroke: #fff;}
         aside .logo h2 { font-size: 1.6rem; font-weight: 800; margin: 0; letter-spacing: -0.5px; display: flex; gap: 4px; align-items: baseline; }
         aside .logo h2 span.primary { color: var(--color-primary); }
-        /* ------------------------ */
 
-        aside .sidebar { background: rgb(255, 255, 255); display: flex; flex-direction: column; height: 86vh; position: relative; top: 1rem; border-radius: 0.4rem; padding-top: 2rem; }
-        aside .sidebar a { display: flex; color: var(--color-info-dark); margin-left: 2rem; gap: 1rem; align-items: center; position: relative; height: 3.7rem; transition: all 300ms ease; }
-        aside .sidebar a span { font-size: 1.6rem; transition: all 300ms ease; }
-        aside .sidebar a.active { background: var(--color-light); color: var(--color-primary); margin-left: 0; }
-        aside .sidebar a.active:before { content: ""; width: 6px; height: 100%; background: var(--color-primary); }
-        aside .sidebar a.active span { color: var(--color-primary); margin-left: calc(1rem - 3px); }
-        aside .sidebar a:hover { color: var(--color-primary); }
-        aside .sidebar a:hover span { margin-left: 1rem; }
+        /* --- Sidebar 设计 --- */
+        aside .sidebar { background: rgb(255, 255, 255); display: flex; flex-direction: column; height: 86vh; position: relative; top: 1rem; border-radius: 1.2rem; padding-top: 1.5rem; border: 1px solid var(--color-info-light); box-shadow: 0 1rem 3rem rgba(0, 0, 0, 0.02); }
+        aside .sidebar a { display: flex; color: var(--color-info-dark); margin: 0.4rem 1.2rem; padding: 0.8rem 1.2rem; gap: 1.2rem; align-items: center; position: relative; border-radius: 0.8rem; border: 1px solid transparent; transition: all 0.3s ease; }
+        aside .sidebar a span { font-size: 1.6rem; transition: all 0.3s ease; }
+        aside .sidebar a.active { background: rgba(232, 93, 38, 0.08); color: var(--color-primary); border: 1px solid rgba(232, 93, 38, 0.4); box-shadow: inset 0 0 0 1px rgba(255,255,255,0.5); }
+        aside .sidebar a:hover { color: var(--color-primary); background: var(--color-light); border-color: var(--color-info-light); transform: translateX(4px); }
+        aside .sidebar a.active:hover { transform: none; border-color: var(--color-primary); }
         
         /* --- 独立的 Logout 按钮设计 --- */
         aside .sidebar a.logout-btn {
-            margin-top: auto; 
-            margin-bottom: 2rem;
-            margin-left: 1.5rem;
-            margin-right: 1.5rem;
-            border: 2px solid var(--color-info-light);
-            border-radius: 50px;
-            justify-content: center;
-            color: var(--color-info-dark);
-            transition: all 0.3s ease;
+            margin-top: auto; margin-bottom: 1.5rem; border: 2px solid var(--color-info-light); border-radius: 50px; justify-content: center; color: var(--color-info-dark); background: transparent; transition: all 0.3s ease;
         }
-        aside .sidebar a.logout-btn:hover {
-            background: #ffeaea; 
-            border-color: var(--color-danger);
-            color: var(--color-danger);
-        }
-        aside .sidebar a.logout-btn:hover span {
-            margin-left: 0; 
-        }
+        aside .sidebar a.logout-btn:hover { background: #ffeaea; border-color: var(--color-danger); color: var(--color-danger); transform: none; }
 
         main { margin-top: 1.4rem; padding-bottom: 3rem; }
-        .form-section, .table-section { background: white; padding: 1.8rem; border-radius: 2rem; margin-top: 1.5rem; box-shadow: 0 2rem 3rem var(--color-light); }
+        .form-section, .table-section { background: white; padding: 1.8rem; border-radius: 2rem; margin-top: 1.5rem; box-shadow: 0 2rem 3rem var(--color-light); border: 1px solid var(--color-info-light); }
         .form-group { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-bottom: 1rem; }
         input, textarea { padding: 1rem; border-radius: 0.4rem; border: 1px solid var(--color-light); background: var(--color-background); color: var(--color-dark); font-size: 0.9rem; width: 100%; transition: all 0.3s ease; }
         textarea { grid-column: span 3; height: 80px; resize: none; }
@@ -198,13 +191,25 @@ $jobs_list = mysqli_query($conn, "SELECT * FROM jobs ORDER BY job_id DESC");
                     <span class="material-symbols-sharp">work</span>
                     <h3>Job Management</h3>
                 </a>
-                <a href="manage_user.php">
+                <a href="manage_application.php">
                     <span class="material-symbols-sharp">description</span>
-                    <h3>User Management</h3>
+                    <h3>Application Management</h3>
                 </a>
                 <a href="manage_company.php">
                     <span class="material-symbols-sharp">business</span>
                     <h3>Company Management</h3>
+                </a>
+                <a href="manage_users.php">
+                    <span class="material-symbols-sharp">people</span>
+                    <h3>User Management</h3>
+                </a>
+                <a href="report.php">
+                    <span class="material-symbols-sharp">analytics</span>
+                    <h3>Reports & Analytics</h3>
+                </a>
+                <a href="interviews.php">
+                    <span class="material-symbols-sharp">schedule</span>
+                    <h3>Interviews</h3>
                 </a>
                 <a href="admin_login.php" class="logout-btn">
                     <span class="material-symbols-sharp">logout</span>
@@ -214,7 +219,7 @@ $jobs_list = mysqli_query($conn, "SELECT * FROM jobs ORDER BY job_id DESC");
         </aside>
 
         <main>
-            <h1>Job Management</h1>
+            <h1 class="page-title">Job Management</h1>
 
             <?php if ($message): ?>
                 <div class="alert <?php echo $messageType; ?>"><?php echo $message; ?></div>
