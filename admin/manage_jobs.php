@@ -8,104 +8,66 @@ $admin_id = isset($_SESSION['admin_id']) ? $_SESSION['admin_id'] : 1;
 $message = '';
 $messageType = '';
 
-// --- 1. 自动建表：支持多公司管理的全新 companies 表 ---
-$createTableQuery = "CREATE TABLE IF NOT EXISTS companies (
-    company_id INT AUTO_INCREMENT PRIMARY KEY,
-    company_name VARCHAR(255) NOT NULL,
-    industry VARCHAR(100),
-    email VARCHAR(100),
-    phone VARCHAR(20),
-    address TEXT,
-    description TEXT,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-)";
-mysqli_query($conn, $createTableQuery);
+if (isset($_POST['add_job'])) {
+    $jobtitle = mysqli_real_escape_string($conn, $_POST['jobtitle']);
+    $position = mysqli_real_escape_string($conn, $_POST['position']);
+    $salary = floatval($_POST['salary']); // 对应 DECIMAL(10,2)
+    $details = mysqli_real_escape_string($conn, $_POST['details']);
 
-// 如果表里没数据，自动插入 3 家公司作为测试账号
-$checkEmpty = mysqli_query($conn, "SELECT COUNT(*) as total FROM companies");
-$rowCount = mysqli_fetch_assoc($checkEmpty)['total'];
-if ($rowCount == 0) {
-    mysqli_query($conn, "INSERT INTO companies (company_name, industry, email, phone, address, description) VALUES 
-    ('Google Malaysia', 'Technology', 'contact@google.com.my', '03-22010000', 'Axiata Tower, Kuala Lumpur', 'Global tech giant specializing in search, AI, and cloud infrastructure.'),
-    ('Intel Penang', 'Manufacturing', 'hr@intel.com', '04-6400000', 'Bayan Lepas Free Industrial Zone, Penang', 'Leading worldwide semiconductor chip manufacturer.'),
-    ('ApplyGo Tech', 'Technology', 'hr@applygo.com', '012-3456789', '123 Tech Park, Melaka', 'An innovative talent recruitment platform matching employers with candidates.')");
-}
-
-// --- 2. 处理：添加新公司 ---
-if (isset($_POST['add_company'])) {
-    $c_name = mysqli_real_escape_string($conn, $_POST['company_name']);
-    $c_industry = mysqli_real_escape_string($conn, $_POST['industry']);
-    $c_email = mysqli_real_escape_string($conn, $_POST['email']);
-    $c_phone = mysqli_real_escape_string($conn, $_POST['phone']);
-    $c_address = mysqli_real_escape_string($conn, $_POST['address']);
-    $c_desc = mysqli_real_escape_string($conn, $_POST['description']);
-
-    $sql = "INSERT INTO companies (company_name, industry, email, phone, address, description) 
-            VALUES ('$c_name', '$c_industry', '$c_email', '$c_phone', '$c_address', '$c_desc')";
+    $sql = "INSERT INTO jobs (admin_id, jobtitle, position, salary, details) VALUES ('$admin_id', '$jobtitle', '$position', '$salary', '$details')";
     if (mysqli_query($conn, $sql)) {
-        $message = "Company added successfully!";
+        $message = "Job added successfully!";
         $messageType = "success";
     } else {
-        $message = "Error adding company: " . mysqli_error($conn);
+        $message = "Error adding job: " . mysqli_error($conn);
         $messageType = "danger";
     }
 }
 
-// --- 3. 处理：删除公司 ---
 if (isset($_GET['delete'])) {
-    $company_id = intval($_GET['delete']);
-    $sql = "DELETE FROM companies WHERE company_id = $company_id";
+    $job_id = intval($_GET['delete']);
+    $sql = "DELETE FROM jobs WHERE job_id = $job_id";
     if (mysqli_query($conn, $sql)) {
-        $message = "Company profile deleted successfully!";
+        $message = "Job deleted successfully!";
         $messageType = "success";
     } else {
-        $message = "Error deleting company: " . mysqli_error($conn);
+        $message = "Error deleting job: " . mysqli_error($conn);
         $messageType = "danger";
     }
 }
 
-// --- 4. 处理：更新公司资料 ---
-if (isset($_POST['update_company'])) {
-    $company_id = intval($_POST['company_id']);
-    $c_name = mysqli_real_escape_string($conn, $_POST['company_name']);
-    $c_industry = mysqli_real_escape_string($conn, $_POST['industry']);
-    $c_email = mysqli_real_escape_string($conn, $_POST['email']);
-    $c_phone = mysqli_real_escape_string($conn, $_POST['phone']);
-    $c_address = mysqli_real_escape_string($conn, $_POST['address']);
-    $c_desc = mysqli_real_escape_string($conn, $_POST['description']);
+if (isset($_POST['update_job'])) {
+    $job_id = intval($_POST['job_id']);
+    $jobtitle = mysqli_real_escape_string($conn, $_POST['jobtitle']);
+    $position = mysqli_real_escape_string($conn, $_POST['position']);
+    $salary = floatval($_POST['salary']);
+    $details = mysqli_real_escape_string($conn, $_POST['details']);
 
-    $sql = "UPDATE companies SET 
-            company_name='$c_name', industry='$c_industry', 
-            email='$c_email', phone='$c_phone', 
-            address='$c_address', description='$c_desc' 
-            WHERE company_id=$company_id";
-            
+    $sql = "UPDATE jobs SET jobtitle='$jobtitle', position='$position', salary='$salary', details='$details' WHERE job_id=$job_id";
     if (mysqli_query($conn, $sql)) {
-        header("Location: manage_company.php?msg=updated");
+        header("Location: manage_jobs.php?msg=updated");
         exit;
     } else {
-        $message = "Error updating company: " . mysqli_error($conn);
+        $message = "Error updating job: " . mysqli_error($conn);
         $messageType = "danger";
     }
 }
 
 if (isset($_GET['msg']) && $_GET['msg'] == 'updated') {
-    $message = "Company updated successfully!";
+    $message = "Job updated successfully!";
     $messageType = "success";
 }
 
-// --- 5. 处理：点击 Edit 时加载单家公司数据 ---
-$edit_company = null;
+$edit_job = null;
 if (isset($_GET['edit'])) {
     $edit_id = intval($_GET['edit']);
-    $edit_res = mysqli_query($conn, "SELECT * FROM companies WHERE company_id = $edit_id");
+    $edit_res = mysqli_query($conn, "SELECT * FROM jobs WHERE job_id = $edit_id");
     if (mysqli_num_rows($edit_res) > 0) {
-        $edit_company = mysqli_fetch_assoc($edit_res);
+        $edit_job = mysqli_fetch_assoc($edit_res);
     }
 }
 
-// 获取完整的公司列表展现到表格
-$companies_list = mysqli_query($conn, "SELECT * FROM companies ORDER BY company_id DESC");
+$jobs_list = mysqli_query($conn, "SELECT * FROM jobs ORDER BY job_id DESC");
 ?>
 
 <!DOCTYPE html>
@@ -114,7 +76,7 @@ $companies_list = mysqli_query($conn, "SELECT * FROM companies ORDER BY company_
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE-edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Company Management - HR System</title>
+    <title>Job Management - HR System</title>
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Sharp" rel="stylesheet" />
     
     <style>
@@ -133,7 +95,6 @@ $companies_list = mysqli_query($conn, "SELECT * FROM companies ORDER BY company_
             --color-background: #f6f6f9;
         }
 
-        /* 核心重置与全局字体同步 */
         * { margin: 0; padding: 0; outline: 0; appearance: none; border: 0; text-decoration: none; list-style: none; box-sizing: border-box; }
         html { font-size: 14px; }
         body { width: 100vw; height: 100vh; font-family: poppins, sans-serif; font-size: 0.88rem; background: var(--color-background); user-select: none; overflow-x: hidden; color: var(--color-dark); }
@@ -185,7 +146,6 @@ $companies_list = mysqli_query($conn, "SELECT * FROM companies ORDER BY company_
 
         main { margin-top: 1.4rem; padding-bottom: 3rem; }
         .form-section, .table-section { background: white; padding: 1.8rem; border-radius: 2rem; margin-top: 1.5rem; box-shadow: 0 2rem 3rem var(--color-light); border: 1px solid var(--color-info-light); }
-        
         .form-group { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-bottom: 1rem; }
         input, textarea { padding: 1rem; border-radius: 0.4rem; border: 1px solid var(--color-light); background: var(--color-background); color: var(--color-dark); font-size: 0.9rem; width: 100%; transition: all 0.3s ease; }
         textarea { grid-column: span 3; height: 80px; resize: none; }
@@ -202,7 +162,6 @@ $companies_list = mysqli_query($conn, "SELECT * FROM companies ORDER BY company_
         .alert { padding: 1rem; margin-top: 1rem; border-radius: 0.4rem; font-weight: 500; }
         .alert.success { background: rgba(65, 241, 182, 0.2); color: #2e8b57; border: 1px solid #41f1b6; }
         .alert.danger { background: rgba(255, 119, 130, 0.1); color: var(--color-danger); border: 1px solid var(--color-danger); }
-        
         table { width: 100%; border-collapse: collapse; margin-top: 1rem; text-align: left; }
         th, td { padding: 1.2rem; border-bottom: 1px solid var(--color-light); }
         th { color: var(--color-info-dark); }
@@ -228,7 +187,7 @@ $companies_list = mysqli_query($conn, "SELECT * FROM companies ORDER BY company_
                     <span class="material-symbols-sharp">grid_view</span>
                     <h3>Dashboard</h3>
                 </a>
-                <a href="manage_jobs.php">
+                <a href="manage_jobs.php" class="active">
                     <span class="material-symbols-sharp">work</span>
                     <h3>Job Management</h3>
                 </a>
@@ -236,7 +195,7 @@ $companies_list = mysqli_query($conn, "SELECT * FROM companies ORDER BY company_
                     <span class="material-symbols-sharp">description</span>
                     <h3>Application Management</h3>
                 </a>
-                <a href="manage_company.php" class="active">
+                <a href="manage_company.php">
                     <span class="material-symbols-sharp">business</span>
                     <h3>Company Management</h3>
                 </a>
@@ -260,78 +219,71 @@ $companies_list = mysqli_query($conn, "SELECT * FROM companies ORDER BY company_
         </aside>
 
         <main>
-            <h1 class="page-title">Company Management</h1>
+            <h1 class="page-title">Job Management</h1>
 
             <?php if ($message): ?>
                 <div class="alert <?php echo $messageType; ?>"><?php echo $message; ?></div>
             <?php endif; ?>
 
             <div class="form-section">
-                <?php if ($edit_company): ?>
-                    <h2>Edit Company Profile</h2>
-                    <form action="manage_company.php" method="POST">
-                        <input type="hidden" name="company_id" value="<?php echo $edit_company['company_id']; ?>">
+                <?php if ($edit_job): ?>
+                    <h2>Edit Job Position</h2>
+                    <form action="manage_jobs.php" method="POST">
+                        <input type="hidden" name="job_id" value="<?php echo $edit_job['job_id']; ?>">
                         <div class="form-group">
-                            <input type="text" name="company_name" placeholder="Company Name" value="<?php echo htmlspecialchars($edit_company['company_name']); ?>" required>
-                            <input type="text" name="industry" placeholder="Industry (e.g. Technology, Finance)" value="<?php echo htmlspecialchars($edit_company['industry']); ?>" required>
-                            <input type="email" name="email" placeholder="Contact Email" value="<?php echo htmlspecialchars($edit_company['email']); ?>" required>
-                            <input type="text" name="phone" placeholder="Phone Number" value="<?php echo htmlspecialchars($edit_company['phone']); ?>" required>
-                            <input type="text" name="address" placeholder="Headquarters Address" value="<?php echo htmlspecialchars($edit_company['address']); ?>" style="grid-column: span 2;" required>
-                            <textarea name="description" placeholder="Company Profile Description / About Us..." required><?php echo htmlspecialchars($edit_company['description']); ?></textarea>
+                            <input type="text" name="jobtitle" placeholder="Job Title" value="<?php echo htmlspecialchars($edit_job['jobtitle']); ?>" required>
+                            <input type="text" name="position" placeholder="Position (e.g. Full-time, Remote)" value="<?php echo htmlspecialchars($edit_job['position']); ?>" required>
+                            <input type="number" step="0.01" name="salary" placeholder="Salary (e.g. 4000.00)" value="<?php echo htmlspecialchars($edit_job['salary']); ?>" required>
+                            <textarea name="details" placeholder="Job Details / Requirements" required><?php echo htmlspecialchars($edit_job['details']); ?></textarea>
                         </div>
-                        <button type="submit" name="update_company" class="btn btn-primary">Update Profile</button>
-                        <a href="manage_company.php" style="margin-left: 1rem; color: var(--color-info-dark); text-decoration: underline;">Cancel</a>
+                        <button type="submit" name="update_job" class="btn btn-primary">Update Job</button>
+                        <a href="manage_jobs.php" style="margin-left: 1rem; color: var(--color-info-dark); text-decoration: underline;">Cancel</a>
                     </form>
                 <?php else: ?>
-                    <h2>Register New Client Company</h2>
-                    <form action="manage_company.php" method="POST">
+                    <h2>Create New Job Post</h2>
+                    <form action="manage_jobs.php" method="POST">
                         <div class="form-group">
-                            <input type="text" name="company_name" placeholder="Company Name (e.g. Shopee)" required>
-                            <input type="text" name="industry" placeholder="Industry Type (e.g. E-Commerce)" required>
-                            <input type="email" name="email" placeholder="Corporate HR Email" required>
-                            <input type="text" name="phone" placeholder="Office Phone" required>
-                            <input type="text" name="address" placeholder="HQ Address Location" style="grid-column: span 2;" required>
-                            <textarea name="description" placeholder="Company Background & Operations overview..." required></textarea>
+                            <input type="text" name="jobtitle" placeholder="Job Title (e.g. Software Engineer)" required>
+                            <input type="text" name="position" placeholder="Position Type (e.g. Full-time)" required>
+                            <input type="number" step="0.01" name="salary" placeholder="Salary (e.g. 4000.00)" required>
+                            <textarea name="details" placeholder="Job Details & Requirements..." required></textarea>
                         </div>
-                        <button type="submit" name="add_company" class="btn btn-primary">Add Company</button>
+                        <button type="submit" name="add_job" class="btn btn-primary">Post Job</button>
                     </form>
                 <?php endif; ?>
             </div>
 
             <div class="table-section">
-                <h2>Active Enterprise Partners</h2>
+                <h2>Active Job Lists</h2>
                 <table>
                     <thead>
                         <tr>
                             <th>ID</th>
-                            <th>Company Name</th>
-                            <th>Industry</th>
-                            <th>Contact Info</th>
-                            <th>HQ Address</th>
+                            <th>Job Title</th>
+                            <th>Position</th>
+                            <th>Salary</th>
+                            <th>Details</th>
                             <th>Actions</th>
                         </tr>
                     </thead>
                     <tbody>
-                        <?php if (mysqli_num_rows($companies_list) > 0): ?>
-                            <?php while($row = mysqli_fetch_assoc($companies_list)): ?>
+                        <?php if (mysqli_num_rows($jobs_list) > 0): ?>
+                            <?php while($row = mysqli_fetch_assoc($jobs_list)): ?>
                                 <tr>
-                                    <td><?php echo $row['company_id']; ?></td>
-                                    <td><b style="color: var(--color-dark);"><?php echo htmlspecialchars($row['company_name']); ?></b></td>
-                                    <td><span style="background: var(--color-light); padding: 0.3rem 0.6rem; border-radius: 0.3rem; font-weight: 500; font-size: 0.8rem; color: var(--color-primary);"><?php echo htmlspecialchars($row['industry']); ?></span></td>
-                                    <td>
-                                        <div style="font-size: 0.85rem;">📧 <?php echo htmlspecialchars($row['email']); ?></div>
-                                        <div style="font-size: 0.85rem; color: var(--color-info-dark);">📞 <?php echo htmlspecialchars($row['phone']); ?></div>
-                                    </td>
-                                    <td style="max-width: 220px; font-size: 0.85rem;"><?php echo htmlspecialchars($row['address']); ?></td>
+                                    <td><?php echo $row['job_id']; ?></td>
+                                    <td><b style="color: var(--color-dark);"><?php echo htmlspecialchars($row['jobtitle']); ?></b></td>
+                                    <td><?php echo htmlspecialchars($row['position']); ?></td>
+                                    <td style="color: var(--color-primary); font-weight: 600;">RM <?php echo htmlspecialchars($row['salary']); ?></td>
+                                    <td><?php echo htmlspecialchars(substr($row['details'], 0, 50)) . (strlen($row['details']) > 50 ? '...' : ''); ?></td>
                                     <td class="actions">
-                                        <a href="manage_company.php?edit=<?php echo $row['company_id']; ?>" class="btn btn-warning">Edit</a>
-                                        <a href="manage_company.php?delete=<?php echo $row['company_id']; ?>" class="btn btn-danger" onclick="return confirm('Are you sure you want to remove this corporate partner?')">Delete</a>
+                                        <a href="manage_jobs.php?edit=<?php echo $row['job_id']; ?>" class="btn btn-warning">Edit</a>
+                                        <a href="manage_jobs.php?delete=<?php echo $row['job_id']; ?>" class="btn btn-danger" onclick="return confirm('Are you sure you want to delete this job?')">Delete</a>
                                     </td>
                                 </tr>
                             <?php endwhile; ?>
                         <?php else: ?>
                             <tr>
-                                <td colspan="6" style="text-align: center; color: var(--color-info-dark);">No client companies registered yet.</td>
+                                <td colspan="6" style="text-align: center; color: var(--color-info-dark);">No jobs posted yet.</td>
                             </tr>
                         <?php endif; ?>
                     </tbody>
