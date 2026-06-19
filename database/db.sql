@@ -9,7 +9,6 @@ CREATE TABLE users (
     phoneNo VARCHAR(20),
     password VARCHAR(255),
     resume VARCHAR(255),
-    badge VARCHAR(20) NOT NULL DEFAULT 'Onsite';
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -29,6 +28,7 @@ CREATE TABLE jobs (
     position VARCHAR(100),
     salary DECIMAL(10,2),
     details TEXT,
+    badge VARCHAR(20) NOT NULL DEFAULT 'Onsite';
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (admin_id) REFERENCES admin(admin_id)
 );
