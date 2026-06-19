@@ -416,7 +416,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         <input class="field-input" type="password" name="password" placeholder="••••••••" required />
                     </div>
 
-                    <p class="auth-forgot"><a href="#">Forgot password?</a></p>
+                    <p class="auth-forgot"><a href="forgotpassword.php">Forgot password?</a></p>
 
                     <button class="auth-btn" type="submit">Sign in →</button>
                 </form>

@@ -8,7 +8,7 @@ if (isset($_SESSION['user_id'])) {
 }
 
 require_once '../database/db.php';
-
+date_default_timezone_set('Asia/Kuala_Lumpur');
 // ── Load PHPMailer (via Composer) ────────────────────────────────────────────
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
@@ -150,6 +150,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         $_SESSION['fp_step']  = 2;
                         $_SESSION['fp_email'] = $email;
                         $step = 2;
+                        
                     } else {
                         $error = 'Failed to send email. Please try again later.';
                     }
@@ -236,37 +237,38 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 
-    // ── Resend OTP ───────────────────────────────────────────────────────────
     elseif ($action === 'resend_otp') {
-        $email = $_SESSION['fp_email'] ?? '';
-        if (empty($email)) {
-            $_SESSION['fp_step'] = 1; $step = 1;
+    $email = $_SESSION['fp_email'] ?? '';
+    if (empty($email)) {
+        $_SESSION['fp_step'] = 1; $step = 1;
+    } else {
+        $step = 2; // 👈 加这行
+
+        $otp     = str_pad(random_int(0, 999999), 6, '0', STR_PAD_LEFT);
+        $expires = date('Y-m-d H:i:s', strtotime('+10 minutes'));
+
+        $delStmt = $conn->prepare('UPDATE password_resets SET used = 1 WHERE email = ?');
+        $delStmt->bind_param('s', $email);
+        $delStmt->execute();
+        $delStmt->close();
+
+        $insStmt = $conn->prepare('INSERT INTO password_resets (email, otp, expires_at) VALUES (?, ?, ?)');
+        $insStmt->bind_param('sss', $email, $otp, $expires);
+        $insStmt->execute();
+        $insStmt->close();
+
+        if (sendOtpEmail($email, $otp)) {
+            $success = 'resent';
         } else {
-            $otp     = str_pad(random_int(0, 999999), 6, '0', STR_PAD_LEFT);
-            $expires = date('Y-m-d H:i:s', strtotime('+10 minutes'));
-
-            $delStmt = $conn->prepare('UPDATE password_resets SET used = 1 WHERE email = ?');
-            $delStmt->bind_param('s', $email);
-            $delStmt->execute();
-            $delStmt->close();
-
-            $insStmt = $conn->prepare('INSERT INTO password_resets (email, otp, expires_at) VALUES (?, ?, ?)');
-            $insStmt->bind_param('sss', $email, $otp, $expires);
-            $insStmt->execute();
-            $insStmt->close();
-
-            if (sendOtpEmail($email, $otp)) {
-                $success = 'resent';
-            } else {
-                $error = 'Failed to resend code. Please try again.';
-            }
+            $error = 'Failed to resend code. Please try again.';
         }
     }
+}
 
     // ── Go back to step 1 ────────────────────────────────────────────────────
     elseif ($action === 'restart') {
         unset($_SESSION['fp_step'], $_SESSION['fp_email'], $_SESSION['fp_reset_id']);
-        header('Location: forgot_password.php');
+        header('Location: forgotpassword.php');
         exit;
     }
 }
