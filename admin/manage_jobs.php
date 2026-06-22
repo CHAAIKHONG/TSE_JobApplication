@@ -195,10 +195,6 @@ $jobs_list = mysqli_query($conn, "SELECT * FROM jobs ORDER BY job_id DESC");
                     <span class="material-symbols-sharp">description</span>
                     <h3>Application Management</h3>
                 </a>
-                <a href="manage_company.php">
-                    <span class="material-symbols-sharp">business</span>
-                    <h3>Company Management</h3>
-                </a>
                 <a href="manage_users.php">
                     <span class="material-symbols-sharp">people</span>
                     <h3>User Management</h3>

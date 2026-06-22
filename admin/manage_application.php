@@ -247,10 +247,6 @@ $applications_list = mysqli_query($conn, $sql);
                     <span class="material-symbols-sharp">description</span>
                     <h3>Application Management</h3>
                 </a>
-                <a href="manage_company.php">
-                    <span class="material-symbols-sharp">business</span>
-                    <h3>Company Management</h3>
-                </a>
                 <a href="manage_users.php">
                     <span class="material-symbols-sharp">people</span>
                     <h3>User Management</h3>
@@ -307,7 +303,7 @@ $applications_list = mysqli_query($conn, $sql);
                                     <td><span style="color: var(--color-primary); font-weight:600;"><?php echo htmlspecialchars($row['jobtitle']); ?></span></td>
                                     <td>
     <?php if (!empty($row['resume'])): ?>
-        <a href="/TSE_JobApplication/uploads/resumes/<?php echo htmlspecialchars($row['resume']); ?>" target="_blank" style="color: #1565c0; text-decoration: underline;">View Resume</a>
+        <a href="/TSE_JobApplication/uploads/resumes/<?php echo htmlspecialchars(basename($row['resume'])); ?>" target="_blank" style="color: #1565c0; text-decoration: underline;">View Resume</a>
     <?php else: ?>
         <span style="color: var(--color-info-dark);">No Resume</span>
     <?php endif; ?>

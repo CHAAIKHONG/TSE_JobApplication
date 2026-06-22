@@ -236,10 +236,6 @@ $companies_list = mysqli_query($conn, "SELECT * FROM companies ORDER BY company_
                     <span class="material-symbols-sharp">description</span>
                     <h3>Application Management</h3>
                 </a>
-                <a href="manage_company.php" class="active">
-                    <span class="material-symbols-sharp">business</span>
-                    <h3>Company Management</h3>
-                </a>
                 <a href="manage_users.php">
                     <span class="material-symbols-sharp">people</span>
                     <h3>User Management</h3>

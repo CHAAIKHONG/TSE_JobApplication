@@ -58,10 +58,13 @@ $top_jobs_res = mysqli_query($conn, "
 $top_jobs = [];
 while ($r = mysqli_fetch_assoc($top_jobs_res)) $top_jobs[] = $r;
 
-// --- Badge distribution ---
-$badge_res = mysqli_query($conn, "SELECT badge, COUNT(*) as c FROM users GROUP BY badge");
+// --- Badge distribution (更新：从 jobs 表读取 badge) ---
+$badge_res = mysqli_query($conn, "SELECT badge, COUNT(*) as c FROM jobs GROUP BY badge");
 $badge_data = [];
-while ($r = mysqli_fetch_assoc($badge_res)) $badge_data[$r['badge']] = (int)$r['c'];
+while ($r = mysqli_fetch_assoc($badge_res)) {
+    $b_name = empty($r['badge']) ? 'Onsite' : $r['badge']; // 避免空值
+    $badge_data[$b_name] = (int)$r['c'];
+}
 
 // --- Recent activity log (last 10 notifications as proxy) ---
 $activity_res = mysqli_query($conn, "
@@ -205,10 +208,6 @@ $max_apps = count($apps_per_job) > 0 ? max(array_column($apps_per_job, 'total'))
                     <span class="material-symbols-sharp">description</span>
                     <h3>Application Management</h3>
                 </a>
-                <a href="manage_company.php">
-                    <span class="material-symbols-sharp">business</span>
-                    <h3>Company Management</h3>
-                </a>
                 <a href="manage_users.php">
                     <span class="material-symbols-sharp">people</span>
                     <h3>User Management</h3>
@@ -231,7 +230,6 @@ $max_apps = count($apps_per_job) > 0 ? max(array_column($apps_per_job, 'total'))
     <main>
         <h1 class="page-title">Reports & Analytics</h1>
 
-        <!-- KPI Cards -->
         <div class="kpi-grid">
             <div class="kpi-card">
                 <div class="kpi-top">
@@ -267,7 +265,6 @@ $max_apps = count($apps_per_job) > 0 ? max(array_column($apps_per_job, 'total'))
             </div>
         </div>
 
-        <!-- Charts Row -->
         <div class="charts-row">
             <div class="chart-card">
                 <h3>Application Trend (Last 6 Months)</h3>
@@ -288,9 +285,7 @@ $max_apps = count($apps_per_job) > 0 ? max(array_column($apps_per_job, 'total'))
             </div>
         </div>
 
-        <!-- Bottom Row -->
         <div class="bottom-row">
-            <!-- Top Applied Jobs -->
             <div class="table-card">
                 <h3>Top Applied Positions</h3>
                 <table class="rank-table">
@@ -323,16 +318,14 @@ $max_apps = count($apps_per_job) > 0 ? max(array_column($apps_per_job, 'total'))
                 </table>
             </div>
 
-            <!-- Badge Distribution -->
             <div class="table-card">
-                <h3>Applicant Work Preference</h3>
+                <h3>Job Postings by Work Type</h3>
                 <div class="chart-wrap" style="height:200px">
                     <canvas id="badgeChart"></canvas>
                 </div>
             </div>
         </div>
 
-        <!-- Activity Log -->
         <div class="activity-card">
             <h3>Recent Activity Log</h3>
             <?php if (!empty($activities)): ?>
@@ -404,14 +397,14 @@ new Chart(statusCtx, {
     }
 });
 
-// --- Badge Bar Chart ---
+// --- Badge Bar Chart (Job Postings by Work Type) ---
 const badgeCtx = document.getElementById('badgeChart').getContext('2d');
 new Chart(badgeCtx, {
     type: 'bar',
     data: {
         labels: <?php echo json_encode(array_keys($badge_data) ?: ['N/A']); ?>,
         datasets: [{
-            label: 'Users',
+            label: 'Jobs',
             data: <?php echo json_encode(array_values($badge_data) ?: [0]); ?>,
             backgroundColor: ['#e85d26', '#41f1b6', '#ffbb55'],
             borderRadius: 6,

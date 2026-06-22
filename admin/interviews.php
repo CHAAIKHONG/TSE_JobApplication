@@ -268,10 +268,6 @@ $total_cancelled  = mysqli_fetch_assoc(mysqli_query($conn, "SELECT COUNT(*) as c
                     <span class="material-symbols-sharp">description</span>
                     <h3>Application Management</h3>
                 </a>
-                <a href="manage_company.php">
-                    <span class="material-symbols-sharp">business</span>
-                    <h3>Company Management</h3>
-                </a>
                 <a href="manage_users.php">
                     <span class="material-symbols-sharp">people</span>
                     <h3>User Management</h3>
@@ -298,7 +294,6 @@ $total_cancelled  = mysqli_fetch_assoc(mysqli_query($conn, "SELECT COUNT(*) as c
             <div class="alert <?php echo $messageType; ?>"><?php echo $message; ?></div>
         <?php endif; ?>
 
-        <!-- Stats -->
         <div class="stats-row">
             <div class="stat-card">
                 <div class="stat-icon blue"><span class="material-symbols-sharp">event</span></div>
@@ -314,12 +309,11 @@ $total_cancelled  = mysqli_fetch_assoc(mysqli_query($conn, "SELECT COUNT(*) as c
             </div>
         </div>
 
-        <!-- Schedule Form -->
         <div class="schedule-section">
             <h2><span class="material-symbols-sharp" style="font-size:1.2rem;color:var(--color-primary)">add_circle</span> Schedule New Interview</h2>
 
             <?php if (!empty($eligible)): ?>
-            <form method="POST" action="interview.php">
+            <form method="POST" action="interviews.php">
                 <div class="form-grid">
                     <div class="form-group full">
                         <label>Select Accepted Applicant</label>
@@ -358,14 +352,13 @@ $total_cancelled  = mysqli_fetch_assoc(mysqli_query($conn, "SELECT COUNT(*) as c
             <?php endif; ?>
         </div>
 
-        <!-- Interviews List -->
         <div class="interviews-section">
             <h2>All Interviews</h2>
             <div class="filter-bar">
-                <a href="interview.php?status=All"       class="filter-btn <?php echo $status_filter==='All'?'active':''; ?>">All</a>
-                <a href="interview.php?status=Scheduled" class="filter-btn <?php echo $status_filter==='Scheduled'?'active':''; ?>">Scheduled</a>
-                <a href="interview.php?status=Completed" class="filter-btn <?php echo $status_filter==='Completed'?'active':''; ?>">Completed</a>
-                <a href="interview.php?status=Cancelled" class="filter-btn <?php echo $status_filter==='Cancelled'?'active':''; ?>">Cancelled</a>
+                <a href="interviews.php?status=All"       class="filter-btn <?php echo $status_filter==='All'?'active':''; ?>">All</a>
+                <a href="interviews.php?status=Scheduled" class="filter-btn <?php echo $status_filter==='Scheduled'?'active':''; ?>">Scheduled</a>
+                <a href="interviews.php?status=Completed" class="filter-btn <?php echo $status_filter==='Completed'?'active':''; ?>">Completed</a>
+                <a href="interviews.php?status=Cancelled" class="filter-btn <?php echo $status_filter==='Cancelled'?'active':''; ?>">Cancelled</a>
             </div>
 
             <?php if (!empty($interviews)): ?>
@@ -426,10 +419,10 @@ $total_cancelled  = mysqli_fetch_assoc(mysqli_query($conn, "SELECT COUNT(*) as c
 
                     <div class="card-actions">
                         <?php if ($iv['status'] === 'Scheduled'): ?>
-                            <a href="interview.php?action=complete&interview_id=<?php echo $iv['interview_id']; ?>" class="btn btn-complete" onclick="return confirm('Mark as completed?')">Mark Complete</a>
-                            <a href="interview.php?action=cancel&interview_id=<?php echo $iv['interview_id']; ?>" class="btn btn-cancel" onclick="return confirm('Cancel this interview?')">Cancel</a>
+                            <a href="interviews.php?action=complete&interview_id=<?php echo $iv['interview_id']; ?>" class="btn btn-complete" onclick="return confirm('Mark as completed?')">Mark Complete</a>
+                            <a href="interviews.php?action=cancel&interview_id=<?php echo $iv['interview_id']; ?>" class="btn btn-cancel" onclick="return confirm('Cancel this interview?')">Cancel</a>
                         <?php endif; ?>
-                        <a href="interview.php?action=delete&interview_id=<?php echo $iv['interview_id']; ?>" class="btn btn-delete" onclick="return confirm('Delete this interview record?')">Delete</a>
+                        <a href="interviews.php?action=delete&interview_id=<?php echo $iv['interview_id']; ?>" class="btn btn-delete" onclick="return confirm('Delete this interview record?')">Delete</a>
                     </div>
                 </div>
                 <?php endforeach; ?>

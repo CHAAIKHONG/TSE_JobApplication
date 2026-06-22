@@ -23,20 +23,16 @@ if (isset($_GET['action']) && $_GET['action'] === 'delete' && isset($_GET['user_
     }
 }
 
-// --- 2. Search & Filter ---
+// --- 2. Search ---
 $search = isset($_GET['search']) ? mysqli_real_escape_string($conn, trim($_GET['search'])) : '';
-$badge_filter = isset($_GET['badge']) ? mysqli_real_escape_string($conn, $_GET['badge']) : 'All';
 
 $where = "WHERE 1=1";
 if ($search !== '') {
     $where .= " AND (u.name LIKE '%$search%' OR u.email LIKE '%$search%')";
 }
-if ($badge_filter !== 'All') {
-    $where .= " AND u.badge = '$badge_filter'";
-}
 
-// --- 3. Fetch Users with application count ---
-$sql = "SELECT u.user_id, u.name, u.email, u.phoneNo, u.badge, u.resume, u.created_at,
+// --- 3. Fetch Users with application count (Removed badge) ---
+$sql = "SELECT u.user_id, u.name, u.email, u.phoneNo, u.resume, u.created_at,
                COUNT(a.application_id) AS total_applications
         FROM users u
         LEFT JOIN applications a ON u.user_id = a.user_id
@@ -127,15 +123,14 @@ if (isset($_GET['view']) && is_numeric($_GET['view'])) {
 
         /* Toolbar */
         .toolbar { display: flex; gap: 1rem; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; }
-        .search-wrap { position: relative; flex: 1; min-width: 200px; }
+        .search-wrap { position: relative; flex: 1; min-width: 200px; max-width: 400px; }
         .search-wrap span { position: absolute; left: 0.9rem; top: 50%; transform: translateY(-50%); color: var(--color-info-dark); font-size: 1.2rem; }
         .search-wrap input { width: 100%; padding: 0.65rem 1rem 0.65rem 2.6rem; border-radius: 50px; border: 1.5px solid var(--color-info-light); background: #fff; font-size: 0.85rem; color: var(--color-dark); font-family: poppins, sans-serif; transition: border 0.2s; }
         .search-wrap input:focus { border-color: var(--color-primary); outline: none; }
-        .filter-btn { padding: 0.6rem 1.4rem; border-radius: 50px; border: 1.5px solid var(--color-info-light); background: white; color: var(--color-dark-variant); cursor: pointer; font-weight: 600; font-size: 0.82rem; font-family: poppins, sans-serif; transition: all 0.2s; }
-        .filter-btn:hover { border-color: var(--color-primary); color: var(--color-primary); }
-        .filter-btn.active { background: var(--color-primary); color: white; border-color: var(--color-primary); }
+        .filter-btn { padding: 0.6rem 1.4rem; border-radius: 50px; border: 1.5px solid var(--color-primary); background: var(--color-primary); color: white; cursor: pointer; font-weight: 600; font-size: 0.82rem; font-family: poppins, sans-serif; transition: all 0.2s; }
+        .filter-btn:hover { background: var(--color-primary-variant); }
 
-        /* Stats row */
+        /* Stats row (Updated) */
         .stats-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-bottom: 1.5rem; }
         .stat-card { background: #fff; border: 1px solid var(--color-info-light); border-radius: 1rem; padding: 1.2rem 1.4rem; display: flex; align-items: center; gap: 1rem; }
         .stat-icon { width: 42px; height: 42px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.3rem; flex-shrink: 0; }
@@ -157,11 +152,6 @@ if (isset($_GET['view']) && is_numeric($_GET['view'])) {
         .user-avatar { width: 34px; height: 34px; border-radius: 50%; background: rgba(232,93,38,0.1); color: var(--color-primary); font-size: 0.78rem; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; text-transform: uppercase; }
         .user-name { font-weight: 600; color: var(--color-dark); }
         .user-email { font-size: 0.78rem; color: var(--color-info-dark); }
-
-        .badge-pill { display: inline-block; padding: 0.25rem 0.75rem; border-radius: 50px; font-size: 0.72rem; font-weight: 700; }
-        .badge-onsite { background: rgba(55,138,221,0.12); color: #185fa5; }
-        .badge-remote { background: rgba(65,241,182,0.18); color: #0f6e56; }
-        .badge-hybrid { background: rgba(255,187,85,0.2); color: #ba7517; }
 
         .app-count { display: inline-block; background: rgba(232,93,38,0.1); color: var(--color-primary); font-weight: 700; padding: 0.2rem 0.7rem; border-radius: 50px; font-size: 0.8rem; }
 
@@ -214,38 +204,34 @@ if (isset($_GET['view']) && is_numeric($_GET['view'])) {
         </div>
         <div class="sidebar">
             <a href="home.php">
-                    <span class="material-symbols-sharp">grid_view</span>
-                    <h3>Dashboard</h3>
-                </a>
-                <a href="manage_jobs.php">
-                    <span class="material-symbols-sharp">work</span>
-                    <h3>Job Management</h3>
-                </a>
-                <a href="manage_application.php"> 
-                    <span class="material-symbols-sharp">description</span>
-                    <h3>Application Management</h3>
-                </a>
-                <a href="manage_company.php">
-                    <span class="material-symbols-sharp">business</span>
-                    <h3>Company Management</h3>
-                </a>
-                <a href="manage_users.php" class="active">
-                    <span class="material-symbols-sharp">people</span>
-                    <h3>User Management</h3>
-                </a>
-                <a href="report.php">
-                    <span class="material-symbols-sharp">analytics</span>
-                    <h3>Reports & Analytics</h3>
-                </a>
-                <a href="interviews.php">
-                    <span class="material-symbols-sharp">schedule</span>
-                    <h3>Interviews</h3>
-                </a>
-                <a href="admin_login.php" class="logout-btn">
-                    <span class="material-symbols-sharp">logout</span>
-                    <h3>Logout</h3>
-                </a>
-            </div>
+                <span class="material-symbols-sharp">grid_view</span>
+                <h3>Dashboard</h3>
+            </a>
+            <a href="manage_jobs.php">
+                <span class="material-symbols-sharp">work</span>
+                <h3>Job Management</h3>
+            </a>
+            <a href="manage_application.php"> 
+                <span class="material-symbols-sharp">description</span>
+                <h3>Application Management</h3>
+            </a>
+            <a href="manage_users.php" class="active">
+                <span class="material-symbols-sharp">people</span>
+                <h3>User Management</h3>
+            </a>
+            <a href="report.php">
+                <span class="material-symbols-sharp">analytics</span>
+                <h3>Reports & Analytics</h3>
+            </a>
+            <a href="interviews.php">
+                <span class="material-symbols-sharp">schedule</span>
+                <h3>Interviews</h3>
+            </a>
+            <a href="admin_login.php" class="logout-btn">
+                <span class="material-symbols-sharp">logout</span>
+                <h3>Logout</h3>
+            </a>
+        </div>
     </aside>
 
     <main>
@@ -256,15 +242,10 @@ if (isset($_GET['view']) && is_numeric($_GET['view'])) {
         <?php endif; ?>
 
         <?php if ($view_user): ?>
-        <!-- ===== DETAIL VIEW ===== -->
         <?php
             $vname = htmlspecialchars($view_user['name']);
             $vinit = '';
             foreach (array_slice(explode(' ', $vname), 0, 2) as $p) $vinit .= strtoupper(substr($p,0,1));
-            $vbadge = $view_user['badge'] ?? 'Onsite';
-            $badge_cls = 'badge-onsite';
-            if ($vbadge === 'Remote') $badge_cls = 'badge-remote';
-            elseif ($vbadge === 'Hybrid') $badge_cls = 'badge-hybrid';
         ?>
         <a href="manage_users.php" class="back-btn"><span class="material-symbols-sharp" style="font-size:1rem">arrow_back</span> Back to Users</a>
         <br><br>
@@ -276,23 +257,19 @@ if (isset($_GET['view']) && is_numeric($_GET['view'])) {
                         <div class="detail-name"><?php echo $vname; ?></div>
                         <div class="detail-email"><?php echo htmlspecialchars($view_user['email']); ?></div>
                     </div>
-                    <span class="badge-pill <?php echo $badge_cls; ?>" style="margin-left:0.5rem"><?php echo $vbadge; ?></span>
                 </div>
                 <?php if (!empty($view_user['resume'])): ?>
-                    <a href="../uploads/<?php echo htmlspecialchars($view_user['resume']); ?>" target="_blank" class="btn btn-view">View Resume</a>
+                    <a href="/TSE_JobApplication/uploads/resumes/<?php echo htmlspecialchars(basename($view_user['resume'])); ?>" target="_blank" class="btn btn-view">View Resume</a>
                 <?php endif; ?>
             </div>
 
             <div class="detail-grid">
-                <!-- Basic Info -->
                 <div class="detail-section">
                     <h3>Basic Info</h3>
                     <div class="detail-row"><span class="detail-label">Phone</span><span class="detail-value"><?php echo htmlspecialchars($view_user['phoneNo'] ?? 'N/A'); ?></span></div>
                     <div class="detail-row"><span class="detail-label">Joined</span><span class="detail-value"><?php echo date('d M Y', strtotime($view_user['created_at'])); ?></span></div>
-                    <div class="detail-row"><span class="detail-label">Badge</span><span class="detail-value"><span class="badge-pill <?php echo $badge_cls; ?>"><?php echo $vbadge; ?></span></span></div>
                 </div>
 
-                <!-- Applications -->
                 <div class="detail-section">
                     <h3>Applications (<?php echo count($user_apps); ?>)</h3>
                     <?php if (!empty($user_apps)): foreach ($user_apps as $ap): ?>
@@ -312,7 +289,6 @@ if (isset($_GET['view']) && is_numeric($_GET['view'])) {
                     <?php endif; ?>
                 </div>
 
-                <!-- Education -->
                 <div class="detail-section">
                     <h3>Education</h3>
                     <?php if (!empty($user_edu)): foreach ($user_edu as $ed): ?>
@@ -326,7 +302,6 @@ if (isset($_GET['view']) && is_numeric($_GET['view'])) {
                     <?php endif; ?>
                 </div>
 
-                <!-- Career History -->
                 <div class="detail-section">
                     <h3>Career History</h3>
                     <?php if (!empty($user_career)): foreach ($user_career as $ch): ?>
@@ -343,12 +318,11 @@ if (isset($_GET['view']) && is_numeric($_GET['view'])) {
         </div>
 
         <?php else: ?>
-        <!-- ===== LIST VIEW ===== -->
-
         <?php
+            // 更新了统计卡片的数据查询
             $total_users = mysqli_num_rows(mysqli_query($conn, "SELECT user_id FROM users"));
-            $onsite_count = mysqli_fetch_assoc(mysqli_query($conn, "SELECT COUNT(*) as c FROM users WHERE badge='Onsite'"))['c'];
-            $remote_count = mysqli_fetch_assoc(mysqli_query($conn, "SELECT COUNT(*) as c FROM users WHERE badge='Remote'"))['c'];
+            $total_apps = mysqli_fetch_assoc(mysqli_query($conn, "SELECT COUNT(*) as c FROM applications"))['c'];
+            $active_users = mysqli_fetch_assoc(mysqli_query($conn, "SELECT COUNT(DISTINCT user_id) as c FROM applications"))['c'];
         ?>
 
         <div class="stats-row">
@@ -357,12 +331,12 @@ if (isset($_GET['view']) && is_numeric($_GET['view'])) {
                 <div class="stat-info"><p>Total Users</p><h2><?php echo $total_users; ?></h2></div>
             </div>
             <div class="stat-card">
-                <div class="stat-icon orange"><span class="material-symbols-sharp">location_on</span></div>
-                <div class="stat-info"><p>Onsite</p><h2><?php echo $onsite_count; ?></h2></div>
+                <div class="stat-icon orange"><span class="material-symbols-sharp">description</span></div>
+                <div class="stat-info"><p>Total Applications</p><h2><?php echo $total_apps; ?></h2></div>
             </div>
             <div class="stat-card">
-                <div class="stat-icon green"><span class="material-symbols-sharp">wifi</span></div>
-                <div class="stat-info"><p>Remote</p><h2><?php echo $remote_count; ?></h2></div>
+                <div class="stat-icon green"><span class="material-symbols-sharp">person_check</span></div>
+                <div class="stat-info"><p>Active Applicants</p><h2><?php echo $active_users; ?></h2></div>
             </div>
         </div>
 
@@ -372,10 +346,7 @@ if (isset($_GET['view']) && is_numeric($_GET['view'])) {
                     <span class="material-symbols-sharp">search</span>
                     <input type="text" name="search" placeholder="Search by name or email..." value="<?php echo htmlspecialchars($search); ?>">
                 </div>
-                <button type="submit" name="badge" value="All" class="filter-btn <?php echo $badge_filter==='All'?'active':''; ?>">All</button>
-                <button type="submit" name="badge" value="Onsite" class="filter-btn <?php echo $badge_filter==='Onsite'?'active':''; ?>">Onsite</button>
-                <button type="submit" name="badge" value="Remote" class="filter-btn <?php echo $badge_filter==='Remote'?'active':''; ?>">Remote</button>
-                <button type="submit" name="badge" value="Hybrid" class="filter-btn <?php echo $badge_filter==='Hybrid'?'active':''; ?>">Hybrid</button>
+                <button type="submit" class="filter-btn active">Search</button>
             </div>
         </form>
 
@@ -386,7 +357,6 @@ if (isset($_GET['view']) && is_numeric($_GET['view'])) {
                         <th>#</th>
                         <th>User</th>
                         <th>Phone</th>
-                        <th>Badge</th>
                         <th>Applications</th>
                         <th>Joined</th>
                         <th>Actions</th>
@@ -399,8 +369,6 @@ if (isset($_GET['view']) && is_numeric($_GET['view'])) {
                             $uname = htmlspecialchars($u['name']);
                             $init = '';
                             foreach (array_slice(explode(' ', $uname), 0, 2) as $p) $init .= strtoupper(substr($p,0,1));
-                            $ub = $u['badge'] ?? 'Onsite';
-                            $ubcls = $ub==='Remote'?'badge-remote':($ub==='Hybrid'?'badge-hybrid':'badge-onsite');
                     ?>
                     <tr>
                         <td><?php echo $i++; ?></td>
@@ -414,7 +382,6 @@ if (isset($_GET['view']) && is_numeric($_GET['view'])) {
                             </div>
                         </td>
                         <td><?php echo htmlspecialchars($u['phoneNo'] ?? 'N/A'); ?></td>
-                        <td><span class="badge-pill <?php echo $ubcls; ?>"><?php echo $ub; ?></span></td>
                         <td><span class="app-count"><?php echo $u['total_applications']; ?></span></td>
                         <td><?php echo date('d M Y', strtotime($u['created_at'])); ?></td>
                         <td>
@@ -425,7 +392,7 @@ if (isset($_GET['view']) && is_numeric($_GET['view'])) {
                         </td>
                     </tr>
                     <?php endwhile; else: ?>
-                    <tr><td colspan="7" style="text-align:center;color:var(--color-info-dark);padding:2rem">No users found.</td></tr>
+                    <tr><td colspan="6" style="text-align:center;color:var(--color-info-dark);padding:2rem">No users found.</td></tr>
                     <?php endif; ?>
                 </tbody>
             </table>
