@@ -443,17 +443,17 @@ try {
                         </div>
                         Post New Job
                     </a>
-                    <a href="manage_user.php" class="quick-action-btn">
+                    <a href="manage_application.php" class="quick-action-btn">
                         <div class="qa-icon blue">
                             <span class="material-symbols-sharp">people</span>
                         </div>
                         View Applications
                     </a>
-                    <a href="manage_company.php" class="quick-action-btn">
+                    <a href="report.php" class="quick-action-btn">
                         <div class="qa-icon green">
-                            <span class="material-symbols-sharp">edit_note</span>
+                            <span class="material-symbols-sharp">analytics</span>
                         </div>
-                        Edit Company Profile
+                        View Reports
                     </a>
                 </div>
             </div>
@@ -514,7 +514,7 @@ try {
             <div class="recent-applications">
                 <div class="recent-applications-header">
                     <h2>Recent Applications</h2>
-                    <a href="manage_user.php" class="view-all-link">View All</a>
+                    <a href="manage_application.php" class="view-all-link">View All</a>
                 </div>
                 <table class="applications-table">
                     <thead>

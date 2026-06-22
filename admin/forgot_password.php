@@ -34,7 +34,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <title>Forgot Password - HR System</title>
     <style>
         :root {
-            --color-primary: #7380ec;
+            --color-primary: #e85d26;
             --color-danger: #ff7782;
             --color-success: #41f1b6;
             --color-white: #fff;
@@ -124,7 +124,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         }
 
         button:hover {
-            background: #111e88;
+            background: #ffa683;
         }
 
         /* 提示信息样式 */
