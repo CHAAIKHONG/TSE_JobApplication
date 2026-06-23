@@ -294,8 +294,14 @@ if (isset($_GET['view']) && is_numeric($_GET['view'])) {
                     <?php if (!empty($user_edu)): foreach ($user_edu as $ed): ?>
                         <div class="history-card">
                             <h4><?php echo htmlspecialchars($ed['institution_name']); ?></h4>
-                            <p><?php echo htmlspecialchars($ed['degree']); ?> · <?php echo htmlspecialchars($ed['field_of_study']); ?></p>
+                            <p><?php echo htmlspecialchars($ed['qualification']); ?> · <?php echo htmlspecialchars($ed['field_of_study']); ?></p>
                             <p><?php echo $ed['start_date'] ? date('Y', strtotime($ed['start_date'])) : ''; ?> – <?php echo $ed['end_date'] ? date('Y', strtotime($ed['end_date'])) : 'Present'; ?></p>
+                            <?php if (!empty($ed['cgpa'])): ?>
+                                <p style="margin-top:0.3rem;">CGPA: <strong><?php echo htmlspecialchars($ed['cgpa']); ?></strong></p>
+                            <?php endif; ?>
+                            <?php if (!empty($ed['description'])): ?>
+                                <p style="margin-top:0.3rem; color: var(--color-dark-variant);"><?php echo htmlspecialchars($ed['description']); ?></p>
+                            <?php endif; ?>
                         </div>
                     <?php endforeach; else: ?>
                         <p class="empty-state">No education records.</p>
