@@ -84,7 +84,6 @@ try {
             --color-background: #f6f6f9;
         }
 
-        /* 核心重置与全局字体同步 */
         * { margin: 0; padding: 0; outline: 0; appearance: none; border: 0; text-decoration: none; list-style: none; box-sizing: border-box; }
         html { font-size: 14px; }
         body { width: 100vw; height: 100vh; font-family: poppins, sans-serif; font-size: 0.88rem; background: var(--color-background); user-select: none; overflow-x: hidden; color: var(--color-dark); }
@@ -92,7 +91,6 @@ try {
         
         a { color: var(--color-dark); }
         
-        /* 标题胶囊边框设计 */
         h1.page-title {
             display: inline-block;
             border: 2px solid var(--color-dark);
@@ -103,7 +101,6 @@ try {
             box-shadow: 0 4px 12px rgba(54, 57, 73, 0.15);
         }
 
-        /* 放在标题下方的日期胶囊 */
         .date-badge {
             display: inline-block;
             margin-top: 10px;
@@ -117,7 +114,7 @@ try {
             border: 1px solid var(--color-info-light);
         }
 
-        /* --- 优化的 Logo 设计 --- */
+        /* --- Logo -- */
         aside { height: 100vh; }
         aside .top { background: white; display: flex; align-items: center; justify-content: center; margin-top: 1.4rem; border-radius: 0.8rem; padding: 1.5rem; border: 1px solid var(--color-light); }
         aside .logo { display: flex; gap: 12px; align-items: center; justify-content: center; }
@@ -130,7 +127,7 @@ try {
         aside .logo h2 { font-size: 1.6rem; font-weight: 800; margin: 0; letter-spacing: -0.5px; display: flex; gap: 4px; align-items: baseline; }
         aside .logo h2 span.primary { color: var(--color-primary); }
 
-        /* --- Sidebar 设计 --- */
+        /* --- Sidebar --- */
         aside .sidebar { background: rgb(255, 255, 255); display: flex; flex-direction: column; height: 86vh; position: relative; top: 1rem; border-radius: 1.2rem; padding-top: 1.5rem; border: 1px solid var(--color-info-light); box-shadow: 0 1rem 3rem rgba(0, 0, 0, 0.02); }
         aside .sidebar a { display: flex; color: var(--color-info-dark); margin: 0.4rem 1.2rem; padding: 0.8rem 1.2rem; gap: 1.2rem; align-items: center; position: relative; border-radius: 0.8rem; border: 1px solid transparent; transition: all 0.3s ease; }
         aside .sidebar a span { font-size: 1.6rem; transition: all 0.3s ease; }
@@ -138,7 +135,7 @@ try {
         aside .sidebar a:hover { color: var(--color-primary); background: var(--color-light); border-color: var(--color-info-light); transform: translateX(4px); }
         aside .sidebar a.active:hover { transform: none; border-color: var(--color-primary); }
 
-        /* --- 独立的 Logout 按钮设计 --- */
+        /* --- Logout  --- */
         aside .sidebar a.logout-btn {
             margin-top: auto; margin-bottom: 1.5rem; border: 2px solid var(--color-info-light); border-radius: 50px; justify-content: center; color: var(--color-info-dark); background: transparent; transition: all 0.3s ease;
         }

@@ -12,7 +12,6 @@ if (isset($_POST['add_job'])) {
     $position = mysqli_real_escape_string($conn, $_POST['position']);
     $salary = floatval($_POST['salary']);
     $details = mysqli_real_escape_string($conn, $_POST['details']);
-    // ✅ 新增：获取 badge，默认 Onsite
     $allowed_badges = ['Onsite', 'Remote', 'Urgent'];
     $badge = in_array($_POST['badge'], $allowed_badges) ? $_POST['badge'] : 'Onsite';
 
@@ -28,9 +27,12 @@ if (isset($_POST['add_job'])) {
 
 if (isset($_GET['delete'])) {
     $job_id = intval($_GET['delete']);
+    
+    mysqli_query($conn, "DELETE FROM applications WHERE job_id = $job_id");
+    
     $sql = "DELETE FROM jobs WHERE job_id = $job_id";
     if (mysqli_query($conn, $sql)) {
-        $message = "Job deleted successfully!";
+        $message = "Job and its related applications deleted successfully!";
         $messageType = "success";
     } else {
         $message = "Error deleting job: " . mysqli_error($conn);
@@ -44,7 +46,6 @@ if (isset($_POST['update_job'])) {
     $position = mysqli_real_escape_string($conn, $_POST['position']);
     $salary = floatval($_POST['salary']);
     $details = mysqli_real_escape_string($conn, $_POST['details']);
-    // ✅ 新增：更新 badge
     $allowed_badges = ['Onsite', 'Remote', 'Urgent'];
     $badge = in_array($_POST['badge'], $allowed_badges) ? $_POST['badge'] : 'Onsite';
 

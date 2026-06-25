@@ -58,11 +58,11 @@ $top_jobs_res = mysqli_query($conn, "
 $top_jobs = [];
 while ($r = mysqli_fetch_assoc($top_jobs_res)) $top_jobs[] = $r;
 
-// --- Badge distribution (更新：从 jobs 表读取 badge) ---
+// --- Badge distribution ---
 $badge_res = mysqli_query($conn, "SELECT badge, COUNT(*) as c FROM jobs GROUP BY badge");
 $badge_data = [];
 while ($r = mysqli_fetch_assoc($badge_res)) {
-    $b_name = empty($r['badge']) ? 'Onsite' : $r['badge']; // 避免空值
+    $b_name = empty($r['badge']) ? 'Onsite' : $r['badge']; // 
     $badge_data[$b_name] = (int)$r['c'];
 }
 

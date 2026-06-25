@@ -8,7 +8,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $email = $_POST['email'];
     $password = $_POST['password'];
 
-    // 示例验证
     if ($email === 'admin@gmail.com' && $password === 'admin123') {
         $_SESSION['admin_logged_in'] = true;
         header("Location: home.php");
@@ -121,7 +120,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             border-radius: 0.4rem;
         }
 
-        /* 新增的链接排版 */
         .extra-links {
             display: flex;
             justify-content: space-between;

@@ -2,13 +2,11 @@
 session_start();
 require_once '../database/db.php';
 
-// 假设 admin_id 存储在 session 中，如果没有则默认设为 1 (测试用)
 $admin_id = isset($_SESSION['admin_id']) ? $_SESSION['admin_id'] : 1;
 
 $message = '';
 $messageType = '';
 
-// --- 1. 自动建表：支持多公司管理的全新 companies 表 ---
 $createTableQuery = "CREATE TABLE IF NOT EXISTS companies (
     company_id INT AUTO_INCREMENT PRIMARY KEY,
     company_name VARCHAR(255) NOT NULL,
@@ -21,7 +19,6 @@ $createTableQuery = "CREATE TABLE IF NOT EXISTS companies (
 )";
 mysqli_query($conn, $createTableQuery);
 
-// 如果表里没数据，自动插入 3 家公司作为测试账号
 $checkEmpty = mysqli_query($conn, "SELECT COUNT(*) as total FROM companies");
 $rowCount = mysqli_fetch_assoc($checkEmpty)['total'];
 if ($rowCount == 0) {
@@ -31,7 +28,6 @@ if ($rowCount == 0) {
     ('ApplyGo Tech', 'Technology', 'hr@applygo.com', '012-3456789', '123 Tech Park, Melaka', 'An innovative talent recruitment platform matching employers with candidates.')");
 }
 
-// --- 2. 处理：添加新公司 ---
 if (isset($_POST['add_company'])) {
     $c_name = mysqli_real_escape_string($conn, $_POST['company_name']);
     $c_industry = mysqli_real_escape_string($conn, $_POST['industry']);
@@ -51,7 +47,6 @@ if (isset($_POST['add_company'])) {
     }
 }
 
-// --- 3. 处理：删除公司 ---
 if (isset($_GET['delete'])) {
     $company_id = intval($_GET['delete']);
     $sql = "DELETE FROM companies WHERE company_id = $company_id";
@@ -64,7 +59,6 @@ if (isset($_GET['delete'])) {
     }
 }
 
-// --- 4. 处理：更新公司资料 ---
 if (isset($_POST['update_company'])) {
     $company_id = intval($_POST['company_id']);
     $c_name = mysqli_real_escape_string($conn, $_POST['company_name']);
@@ -94,7 +88,6 @@ if (isset($_GET['msg']) && $_GET['msg'] == 'updated') {
     $messageType = "success";
 }
 
-// --- 5. 处理：点击 Edit 时加载单家公司数据 ---
 $edit_company = null;
 if (isset($_GET['edit'])) {
     $edit_id = intval($_GET['edit']);
@@ -104,7 +97,6 @@ if (isset($_GET['edit'])) {
     }
 }
 
-// 获取完整的公司列表展现到表格
 $companies_list = mysqli_query($conn, "SELECT * FROM companies ORDER BY company_id DESC");
 ?>
 
@@ -133,7 +125,6 @@ $companies_list = mysqli_query($conn, "SELECT * FROM companies ORDER BY company_
             --color-background: #f6f6f9;
         }
 
-        /* 核心重置与全局字体同步 */
         * { margin: 0; padding: 0; outline: 0; appearance: none; border: 0; text-decoration: none; list-style: none; box-sizing: border-box; }
         html { font-size: 14px; }
         body { width: 100vw; height: 100vh; font-family: poppins, sans-serif; font-size: 0.88rem; background: var(--color-background); user-select: none; overflow-x: hidden; color: var(--color-dark); }
@@ -144,7 +135,6 @@ $companies_list = mysqli_query($conn, "SELECT * FROM companies ORDER BY company_
         h2 { font-size: 1.4rem; margin-bottom: 1rem; }
         .danger { color: var(--color-danger); }
         
-        /* 页面标题胶囊边框设计 */
         h1.page-title {
             display: inline-block;
             border: 2px solid var(--color-dark);
@@ -156,7 +146,7 @@ $companies_list = mysqli_query($conn, "SELECT * FROM companies ORDER BY company_
             margin-bottom: 1.5rem;
         }
 
-        /* --- Logo 设计 --- */
+        /* --- Logo  --- */
         aside { height: 100vh; }
         aside .top { background: white; display: flex; align-items: center; justify-content: center; margin-top: 1.4rem; border-radius: 0.8rem; padding: 1.5rem; border: 1px solid var(--color-light); }
         aside .logo { display: flex; gap: 12px; align-items: center; justify-content: center; }
@@ -169,7 +159,7 @@ $companies_list = mysqli_query($conn, "SELECT * FROM companies ORDER BY company_
         aside .logo h2 { font-size: 1.6rem; font-weight: 800; margin: 0; letter-spacing: -0.5px; display: flex; gap: 4px; align-items: baseline; }
         aside .logo h2 span.primary { color: var(--color-primary); }
 
-        /* --- Sidebar 设计 --- */
+        /* --- Sidebar  --- */
         aside .sidebar { background: rgb(255, 255, 255); display: flex; flex-direction: column; height: 86vh; position: relative; top: 1rem; border-radius: 1.2rem; padding-top: 1.5rem; border: 1px solid var(--color-info-light); box-shadow: 0 1rem 3rem rgba(0, 0, 0, 0.02); }
         aside .sidebar a { display: flex; color: var(--color-info-dark); margin: 0.4rem 1.2rem; padding: 0.8rem 1.2rem; gap: 1.2rem; align-items: center; position: relative; border-radius: 0.8rem; border: 1px solid transparent; transition: all 0.3s ease; }
         aside .sidebar a span { font-size: 1.6rem; transition: all 0.3s ease; }
@@ -177,7 +167,7 @@ $companies_list = mysqli_query($conn, "SELECT * FROM companies ORDER BY company_
         aside .sidebar a:hover { color: var(--color-primary); background: var(--color-light); border-color: var(--color-info-light); transform: translateX(4px); }
         aside .sidebar a.active:hover { transform: none; border-color: var(--color-primary); }
         
-        /* --- 独立的 Logout 按钮设计 --- */
+        /* ---  Logout  --- */
         aside .sidebar a.logout-btn {
             margin-top: auto; margin-bottom: 1.5rem; border: 2px solid var(--color-info-light); border-radius: 50px; justify-content: center; color: var(--color-info-dark); background: transparent; transition: all 0.3s ease;
         }
