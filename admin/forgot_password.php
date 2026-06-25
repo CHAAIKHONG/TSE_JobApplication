@@ -1,6 +1,5 @@
 <?php
 session_start();
-// require_once '../database/db.php'; // 实际使用时取消注释
 
 $message = '';
 $messageType = '';
@@ -9,14 +8,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $email = trim($_POST['email']);
 
     if (!empty($email)) {
-        // --- 真实的逻辑应该在这里 ---
-        // 1. 去数据库查找这个 $email 是否存在
-        // $sql = "SELECT id FROM hr_users WHERE email = '$email'";
-        // 2. 如果存在，生成一个唯一的 Token (比如用 bin2hex(random_bytes(16)))
-        // 3. 把 Token 存进数据库，并设定一个过期时间 (比如 15分钟后过期)
-        // 4. 发送包含 Token 的重置链接到用户的邮箱 (通常用 PHPMailer)
         
-        // 这里为了页面效果，做个模拟成功的提示
         $message = "If an account exists for $email, you will receive a password reset link shortly.";
         $messageType = "success";
     } else {
@@ -127,7 +119,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             background: #ffa683;
         }
 
-        /* 提示信息样式 */
         .alert {
             font-size: 0.9rem;
             margin-bottom: 1.5rem;

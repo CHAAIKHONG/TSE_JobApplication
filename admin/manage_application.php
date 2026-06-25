@@ -5,7 +5,6 @@ require_once '../database/db.php';
 $message = '';
 $messageType = '';
 
-// --- 1. 处理：Accept 或 Reject 申请并发送通知 ---
 if (isset($_GET['action']) && isset($_GET['app_id'])) {
     $action = $_GET['action'];
     $app_id = intval($_GET['app_id']);
@@ -30,7 +29,7 @@ if (isset($_GET['action']) && isset($_GET['app_id'])) {
             $update_sql = "UPDATE applications SET status = '$new_status' WHERE application_id = $app_id";
             if (mysqli_query($conn, $update_sql)) {
                 $notif_msg = "Your application for the position of '$j_title' has been $new_status.";
-                // 修改这一行：
+                
 $safe_msg = mysqli_real_escape_string($conn, $notif_msg);
 $insert_notif = "INSERT INTO notifications (user_id, message) VALUES ($u_id, '$safe_msg')";
                 mysqli_query($conn, $insert_notif);
@@ -42,7 +41,7 @@ $insert_notif = "INSERT INTO notifications (user_id, message) VALUES ($u_id, '$s
     }
 }
 
-// --- 2. 处理：筛选功能 (Filter) ---
+// --- Filter ---
 $filter = isset($_GET['status']) ? $_GET['status'] : 'All';
 $whereClause = "";
 if ($filter !== 'All') {
@@ -50,7 +49,6 @@ if ($filter !== 'All') {
     $whereClause = "WHERE a.status = '$safe_filter'";
 }
 
-// --- 3. 查询：获取申请列表 ---
 $sql = "SELECT a.application_id, a.status, a.applied_at, 
                u.name, u.email, u.resume, 
                j.jobtitle 
@@ -87,7 +85,6 @@ $applications_list = mysqli_query($conn, $sql);
             --color-background: #f6f6f9;
         }
 
-        /* 核心重置 */
         * { margin: 0; padding: 0; outline: 0; appearance: none; border: 0; text-decoration: none; list-style: none; box-sizing: border-box; }
         html { font-size: 14px; }
         body { width: 100vw; height: 100vh; font-family: poppins, sans-serif; font-size: 0.88rem; background: var(--color-background); user-select: none; overflow-x: hidden; color: var(--color-dark); }
@@ -96,7 +93,6 @@ $applications_list = mysqli_query($conn, $sql);
         a { color: var(--color-dark); }
         h1 { font-weight: 800; font-size: 1.8rem; margin-bottom: 1rem; }
         
-        /* 页面标题胶囊边框设计 */
         h1.page-title {
             display: inline-block;
             border: 2px solid var(--color-dark);
@@ -110,7 +106,6 @@ $applications_list = mysqli_query($conn, $sql);
 
         .danger { color: var(--color-danger); }
 
-        /* --- 优化的 Logo 设计 --- */
         aside { height: 100vh; }
         aside .top { background: white; display: flex; align-items: center; justify-content: center; margin-top: 1.4rem; border-radius: 0.8rem; padding: 1.5rem; border: 1px solid var(--color-light); }
         
@@ -127,7 +122,6 @@ $applications_list = mysqli_query($conn, $sql);
         aside .logo h2 span.primary { color: var(--color-primary); }
         /* ------------------------ */
 
-        /* --- 全新升级的 Sidebar 设计 (带边框、圆角、模块化间距) --- */
         aside .sidebar { 
             background: rgb(255, 255, 255); 
             display: flex; 
@@ -168,7 +162,6 @@ $applications_list = mysqli_query($conn, $sql);
         }
         aside .sidebar a.active:hover { transform: none; border-color: var(--color-primary); }
 
-        /* --- 独立的 Logout 按钮设计 (修正间距适配新布局) --- */
         aside .sidebar a.logout-btn {
             margin-top: auto; 
             margin-bottom: 1.5rem;
@@ -192,7 +185,7 @@ $applications_list = mysqli_query($conn, $sql);
         .alert.success { background: rgba(65, 241, 182, 0.2); color: #2e8b57; border: 1px solid #41f1b6; }
         .alert.danger { background: rgba(255, 119, 130, 0.1); color: var(--color-danger); border: 1px solid var(--color-danger); }
 
-        /* Filter Section 优化统一 */
+        /* Filter Section */
         .filter-box { margin-bottom: 1.5rem; display: flex; gap: 1rem; align-items: center; }
         .filter-box span { font-size: 0.9rem; font-weight: 600; color: var(--color-info-dark); }
         .filter-btn { padding: 0.6rem 1.5rem; border-radius: 2rem; border: 1px solid var(--color-light); background: white; color: var(--color-dark); cursor: pointer; transition: all 0.3s ease; font-weight: 600; font-size: 0.85rem; }
@@ -206,13 +199,13 @@ $applications_list = mysqli_query($conn, $sql);
         th { color: var(--color-info-dark); font-weight: 600; }
         tr:last-child td { border: none; }
         
-        /* 状态 Badges */
+        /*  Badges */
         .badge { padding: 0.4rem 0.8rem; border-radius: 0.4rem; font-size: 0.75rem; font-weight: bold; text-transform: uppercase; }
         .badge-pending { background: #fff8ee; color: #f59e0b; }
         .badge-accepted { background: #edf7ee; color: #2e7d32; }
         .badge-rejected { background: #f5f5f5; color: #616161; }
 
-        /* 操作 Buttons */
+        /*  Buttons */
         .btn { padding: 0.5rem 1rem; border-radius: 0.4rem; font-weight: bold; cursor: pointer; color: white; transition: all 300ms ease; font-size: 0.8rem; text-align: center; border: none; }
         .btn-success { background: #2e7d32; }
         .btn-success:hover { background: #1b5e20; transform: translateY(-1px); }
