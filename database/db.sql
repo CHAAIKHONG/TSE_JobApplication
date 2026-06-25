@@ -72,19 +72,21 @@ CREATE TABLE education (
     education_id INT AUTO_INCREMENT PRIMARY KEY,
     user_id INT,
     institution_name VARCHAR(255),
-    degree VARCHAR(255),
+    qualification VARCHAR(255) NOT NULL,
     field_of_study VARCHAR(255),
+    cgpa DECIMAL(3,2) NULL,
+    description TEXT NULL,
     start_date DATE,
     end_date DATE,
     FOREIGN KEY (user_id) REFERENCES users(user_id)
 );
 
--- Interview
--- CREATE TABLE interviews (
---     interview_id INT AUTO_INCREMENT PRIMARY KEY,
---     application_id INT,
---     interview_date DATETIME,
---     location VARCHAR(255),
---     notes TEXT,
---     FOREIGN KEY (application_id) REFERENCES applications(application_id)
--- );
+ --Interview
+ CREATE TABLE interviews (
+     interview_id INT AUTO_INCREMENT PRIMARY KEY,
+     application_id INT,
+     interview_date DATETIME,
+     location VARCHAR(255),
+     notes TEXT,
+     FOREIGN KEY (application_id) REFERENCES applications(application_id)
+ );
